@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Personal Relationship Management</string>
+    <string name="who_to_contact">Who to contact</string>
+    <string name="contacted_today">Contacted today</string>
+    <string name="set_contacted_date">Set contacted date</string>
+    <string name="country">Country: %s</string>
 </resources>
