@@ -1,4 +1,4 @@
-package cz.wz.jelinekp.personalrelationshipmanagement
+package cz.wz.jelinekp.personalrelationshipmanagement.ui
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -9,9 +9,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import cz.wz.jelinekp.personalrelationshipmanagement.ui.PrmApp
+import cz.wz.jelinekp.personalrelationshipmanagement.ui.homescreen.PrmApp
 import cz.wz.jelinekp.personalrelationshipmanagement.ui.theme.PersonalRelationshipManagementTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
@@ -28,6 +30,13 @@ class MainActivity : ComponentActivity() {
 		}
 	}
 }
+
+/*class MainViewModelFactory(private val application: Application) :
+	ViewModelProvider.AndroidViewModelFactory() {
+	override fun <T : ViewModel> create(modelClass: Class<T>): T {
+		return PrmAppViewModel(application) as T
+	}
+}*/
 
 @Preview(showBackground = true)
 @Composable
