@@ -4,4 +4,6 @@
     <string name="contacted_today">Contacted today</string>
     <string name="set_contacted_date">Set contacted date</string>
     <string name="country">Country: %s</string>
+    <string name="note">Note: %s</string>
+    <string name="contactMethod">Contact method: %s</string>
 </resources>
