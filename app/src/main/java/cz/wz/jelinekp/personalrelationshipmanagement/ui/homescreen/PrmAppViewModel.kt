@@ -1,6 +1,8 @@
 package cz.wz.jelinekp.personalrelationshipmanagement.ui.homescreen
 
 import android.app.Application
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.*
 import cz.wz.jelinekp.personalrelationshipmanagement.data.network.ContactDb
 import cz.wz.jelinekp.personalrelationshipmanagement.domain.model.Contact
@@ -16,6 +18,8 @@ class PrmAppViewModel
 @Inject constructor(
 	private val repository: ContactRepository
 ) : ViewModel() {
+	
+	
 	
 	val contacts = repository.getAllContactsFromRoom()
 	

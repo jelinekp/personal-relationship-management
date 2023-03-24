@@ -9,7 +9,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import cz.wz.jelinekp.personalrelationshipmanagement.ui.homescreen.PrmApp
+import cz.wz.jelinekp.personalrelationshipmanagement.navigation.PrmNavHost
 import cz.wz.jelinekp.personalrelationshipmanagement.ui.theme.PersonalRelationshipManagementTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -24,7 +24,7 @@ class MainActivity : ComponentActivity() {
 					modifier = Modifier.fillMaxSize(),
 					color = MaterialTheme.colorScheme.background
 				) {
-					PrmApp()
+					PrmNavHost()
 				}
 			}
 		}
@@ -42,6 +42,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun DefaultPreview() {
 	PersonalRelationshipManagementTheme {
-		PrmApp()
+		PrmNavHost()
 	}
 }

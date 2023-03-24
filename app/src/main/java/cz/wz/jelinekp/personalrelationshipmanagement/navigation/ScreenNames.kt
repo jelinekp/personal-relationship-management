@@ -1,5 +1,5 @@
 package cz.wz.jelinekp.personalrelationshipmanagement.navigation
 
 enum class ScreenNames {
-	CONTACTS_SCREEN, DETAILS_SCREEN
+	CONTACTS_SCREEN, DETAILS_SCREEN, ADD_CONTACT_SCREEN
 }

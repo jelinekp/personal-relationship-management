@@ -23,10 +23,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import cz.wz.jelinekp.personalrelationshipmanagement.R
 import cz.wz.jelinekp.personalrelationshipmanagement.domain.model.Contact
+import cz.wz.jelinekp.personalrelationshipmanagement.ui.components.PrmTopBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PrmApp(
+fun ContactsScreen(
+	onNavigateToAddContact: () -> Unit,
 	prmViewModel: PrmAppViewModel = hiltViewModel(),
 	modifier: Modifier = Modifier
 ) {
@@ -37,11 +39,9 @@ fun PrmApp(
 	val contactList: List<Contact> by contactListFlowLifecycleAware.collectAsState(initial = emptyList())
 	
 	Scaffold(
-		topBar = { PrmTopBar() },
+		topBar = { PrmTopBar(stringResource(R.string.app_name)) },
 		floatingActionButtonPosition = FabPosition.End,
-		floatingActionButton = { AddContactFab {
-		
-		} },
+		floatingActionButton = { AddContactFab (onClick = onNavigateToAddContact)},
 	) { paddingValues ->
 		Column(
 			modifier = Modifier
@@ -71,7 +71,7 @@ fun PrmApp(
 						  },
 					itemContent = { row ->
 						val contactItemData = contactList[row]
-					ContactItem(contact = contactItemData)
+					ContactItem(viewModel = prmViewModel, contact = contactItemData)
 				})
 			}
 		}
@@ -81,6 +81,7 @@ fun PrmApp(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContactItem(
+	viewModel: PrmAppViewModel,
 	contact: Contact,
 	modifier: Modifier = Modifier
 ) {
@@ -92,7 +93,7 @@ fun ContactItem(
 		if (expanded)
 			MaterialTheme.colorScheme.primaryContainer
 		else
-				MaterialTheme.colorScheme.secondaryContainer)
+			MaterialTheme.colorScheme.secondaryContainer)
 	
 	Card(
 		modifier = modifier
@@ -127,7 +128,7 @@ fun ContactItem(
 				verticalArrangement = Arrangement.spacedBy(6.dp),
 				horizontalAlignment = Alignment.End
 			) {
-				ConntactedTodayButton()
+				ContactedTodayButton()
 				if (expanded) {
 					SetContactedDateButton()
 				}
@@ -177,7 +178,7 @@ fun MoreContactInfo(
 }
 
 @Composable
-fun ConntactedTodayButton(
+fun ContactedTodayButton(
 	modifier: Modifier = Modifier
 ) {
 	Button(
@@ -207,25 +208,8 @@ fun SetContactedDateButton(
 }
 
 @Composable
-fun PrmTopBar() {
-	Row(
-		modifier = Modifier
-			.background(color = MaterialTheme.colorScheme.primary)
-			.fillMaxWidth(),
-		verticalAlignment = Alignment.CenterVertically
-	) {
-		Text(
-			text = stringResource(R.string.app_name),
-			style = MaterialTheme.typography.headlineSmall,
-			modifier = Modifier.padding(horizontal = 6.dp, vertical = 12.dp),
-			color = MaterialTheme.colorScheme.onPrimary
-		)
-	}
-}
-
-@Composable
 fun AddContactFab(
-	onClick: () -> Unit = {}
+	onClick: () -> Unit
 ) {
 	FloatingActionButton(onClick = onClick){
 		Text(
