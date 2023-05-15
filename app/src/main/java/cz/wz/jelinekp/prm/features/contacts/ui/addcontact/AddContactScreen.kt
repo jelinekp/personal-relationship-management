@@ -13,6 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import cz.wz.jelinekp.prm.features.contacts.domain.Contact
 import cz.wz.jelinekp.prm.features.contacts.ui.components.PrmTopBar
 import org.koin.androidx.compose.koinViewModel
 
@@ -21,6 +23,8 @@ import org.koin.androidx.compose.koinViewModel
 fun AddContactScreen(
 	viewModel: AddContactViewModel = koinViewModel()
 ) {
+	val screenState by viewModel.screenStateStream.collectAsStateWithLifecycle()
+
 	var name: String
 	var country: String
 	var contactMethod: String
@@ -38,20 +42,28 @@ fun AddContactScreen(
 					.padding(horizontal = 10.dp)
 					.fillMaxSize()
 			) {
-				name = addContactTextField(
-					label = "Name"
+				AddContactTextField(
+					label = "Name",
+					inputText = screenState.name,
+					onValueChange = { text -> viewModel.updateState(screenState.copy(name = text)) }
 				)
-				country = addContactTextField(
-					label = "Country"
+				AddContactTextField(
+					label = "Country",
+					inputText = screenState.country ?: "",
+					onValueChange = { text -> viewModel.updateState(screenState.copy(country = text)) }
 				)
-				contactMethod = addContactTextField(
-					label = "Contact method"
+				AddContactTextField(
+					label = "Contact method",
+					inputText = screenState.contactMethod ?: "",
+					onValueChange = { text -> viewModel.updateState(screenState.copy(contactMethod = text)) }
 				)
-				note = addContactTextField(
-					label = "Note"
+				AddContactTextField(
+					label = "Note",
+					inputText = screenState.note ?: "",
+					onValueChange = { text -> viewModel.updateState(screenState.copy(note = text)) }
 				)
 				
-				Log.d("Contact information:", "name: $name, country: $country, contact method: $contactMethod, note: $note")
+				Log.d("Contact information:", "name: ${screenState.name}, country: ${screenState.country}, contact method: ${screenState.contactMethod}, note: ${screenState.note}")
 			}
 		},
 		bottomBar = {
@@ -59,7 +71,7 @@ fun AddContactScreen(
 				containerColor = MaterialTheme.colorScheme.primary
 			) {
 				Button(
-					onClick = { /* Handle add contact button click */ },
+					onClick = { viewModel.addContact() },
 					modifier = Modifier
 						.fillMaxWidth()
 						.padding(top = 16.dp)
@@ -72,18 +84,18 @@ fun AddContactScreen(
 }
 
 @Composable
-fun addContactTextField(
+fun AddContactTextField(
 	label: String = "",
 	inputText: String = "",
-): String {
+	onValueChange: (text: String) -> Unit,
+) {
 	OutlinedTextField(
 		value = inputText,
 		label = { Text(text = label) },
-		onValueChange = {  },
+		onValueChange = onValueChange,
 		modifier = Modifier.fillMaxWidth()
 	)
 	// Log.d("Input text", "$label: ${inputText.text}")
-	return inputText
 }
 
 @Preview(showBackground = true)

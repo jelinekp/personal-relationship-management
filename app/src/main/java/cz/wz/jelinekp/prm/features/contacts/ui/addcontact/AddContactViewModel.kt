@@ -22,6 +22,10 @@ class AddContactViewModel(
         contactRepository.addContactToRoom(screenStateStream.value)
     }
 
+    fun updateState(contact: Contact) {
+        _screenStateStream.value = contact
+    }
+
 }
 
 data class AddContactScreenState(val contact: Contact)

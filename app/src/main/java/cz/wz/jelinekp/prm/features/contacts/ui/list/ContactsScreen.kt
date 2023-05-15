@@ -84,6 +84,7 @@ fun LoadedState(
 			.padding(horizontal = 16.dp)
 			.fillMaxSize(),
 		verticalArrangement = Arrangement.spacedBy(12.dp),
+		contentPadding = PaddingValues(bottom = 192.dp)
 	) {
 		items(contacts, key = { it.id }) {contact ->
 			ContactItem(
