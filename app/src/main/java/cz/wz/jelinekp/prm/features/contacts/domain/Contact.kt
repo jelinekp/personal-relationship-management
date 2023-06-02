@@ -6,7 +6,6 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.Date
 import kotlinx.parcelize.Parcelize
 
 @Entity(tableName = "contact")
@@ -32,6 +31,8 @@ data class Contact (
 	val createdDateFormatted : String
 		get() = lastContacted.format(DateTimeFormatter.ofPattern("d. L. yyyy"))
 
-}
+	companion object {
+		val emptyContact = Contact(id = 0, name = "", country = "", contactMethod = "", note = "")
+	}
 
-val emptyContact = Contact(id = 0, name = "", country = "", contactMethod = "", note = "")
+}

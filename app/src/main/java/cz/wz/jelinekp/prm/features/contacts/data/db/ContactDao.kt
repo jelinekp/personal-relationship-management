@@ -8,6 +8,7 @@ import androidx.room.Query
 import androidx.room.Update
 import cz.wz.jelinekp.prm.features.contacts.domain.Contact
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDateTime
 
 @Dao
 interface ContactDao {
@@ -26,6 +27,9 @@ interface ContactDao {
 
 	@Update
 	suspend fun updateContact(contact: Contact)
+
+	@Query("UPDATE contact SET last_contacted = :lastContacted WHERE id = :contactId")
+	suspend fun updateLastContacted(contactId: Long, lastContacted: LocalDateTime)
 
 	@Delete
 	suspend fun delete(contact: Contact)

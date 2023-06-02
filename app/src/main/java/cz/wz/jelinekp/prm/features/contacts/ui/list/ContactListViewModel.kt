@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 
 class ContactListViewModel(
 	private val repository: ContactRepository
@@ -19,6 +20,12 @@ class ContactListViewModel(
 	    viewModelScope.launch {
 			val result = repository.getAllContactsFromRoom()
 			_screenStateStream.value = ContactListScreenState.Loaded(result)
+		}
+	}
+
+	fun updateLastContacted(contactId: Long, lastContacted: LocalDateTime = LocalDateTime.now()) {
+		viewModelScope.launch {
+			repository.updateContactLastContacted(contactId = contactId, lastContacted = lastContacted)
 		}
 	}
 
