@@ -13,7 +13,7 @@ import java.time.LocalDateTime
 @Dao
 interface ContactDao {
 	
-	@Query("SELECT * FROM contact")
+	@Query("SELECT * FROM contact ORDER BY last_contacted ASC")
 	fun getAllContacts() : Flow<List<Contact>>
 
 	@Query("SELECT * FROM contact WHERE id = :id")
@@ -33,6 +33,9 @@ interface ContactDao {
 
 	@Delete
 	suspend fun delete(contact: Contact)
+
+	@Query("DELETE FROM contact WHERE id = :contactId")
+	suspend fun deleteContactById(contactId: Long)
 
 	@Query("DELETE FROM contact")
 	suspend fun deleteAll()

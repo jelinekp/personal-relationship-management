@@ -8,30 +8,29 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.*
 import androidx.compose.material3.CardDefaults.cardElevation
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import cz.wz.jelinekp.prm.R
 import cz.wz.jelinekp.prm.features.contacts.domain.Contact
 import cz.wz.jelinekp.prm.features.contacts.ui.components.PrmTopBar
 import org.koin.androidx.compose.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import cz.wz.jelinekp.prm.features.contacts.ui.components.LastContactedDatePicker
 import java.time.LocalDateTime
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,6 +41,7 @@ fun ContactsScreen(
 	modifier: Modifier = Modifier
 ) {
 	val screenState by listViewModel.screenStateStream.collectAsStateWithLifecycle()
+	val datePickerState by listViewModel.datePickerScreenStateStream.collectAsStateWithLifecycle()
 
 	Scaffold(
 		topBar = { PrmTopBar(stringResource(R.string.app_name)) },
@@ -60,7 +60,40 @@ fun ContactsScreen(
 					(screenState as ContactListScreenState.Loaded).contacts.collectAsStateWithLifecycle(
 					initialValue = emptyList()
 				).value,
-					onContactedTodayClick = listViewModel::updateLastContacted
+					onContactedTodayClick = listViewModel::updateLastContacted,
+					onDeleteContact = listViewModel::deleteContact,
+					onLastContactedEditClick = listViewModel::showLastContactedDatePicker
+				)
+			}
+		}
+
+		var lastContactedVar = LocalDateTime.now()
+
+		if (datePickerState.showLastContactedDatePicker != null) {
+			DatePickerDialog(
+				onDismissRequest = {
+					listViewModel.hideLastContactedDatePicker()
+				},
+				confirmButton = {
+					TextButton(onClick = {
+						listViewModel.hideLastContactedDatePicker()
+						listViewModel.updateLastContacted(datePickerState.showLastContactedDatePicker!!, lastContactedVar)
+					}) {
+						Text(text = "OK")
+					}
+				},
+				dismissButton = {
+					TextButton(onClick = {
+						listViewModel.hideLastContactedDatePicker() }) {
+						Text(text = "Cancel")
+					}
+				}
+			) {
+				LastContactedDatePicker(
+					initialDateTime = LocalDateTime.now(),
+					onValueChange = { lastContacted ->
+						lastContactedVar = lastContacted
+					}
 				)
 			}
 		}
@@ -77,16 +110,10 @@ fun LoadingState() {
 @Composable
 fun LoadedState(
 	contacts: List<Contact>,
-	onContactedTodayClick: (contactId: Long) -> Unit
+	onContactedTodayClick: (contactId: Long) -> Unit,
+	onDeleteContact: (contactId: Long) -> Unit,
+	onLastContactedEditClick: (contactId: Long) -> Unit,
 ) {
-	/*Text(
-		text = stringResource(id = R.string.who_to_contact),
-		style = MaterialTheme.typography.bodyLarge,
-		color = MaterialTheme.colorScheme.onBackground,
-		modifier = Modifier
-			.padding(8.dp).padding(start = 8.dp)
-	)*/
-	//Divider()
 	LazyColumn(
 		modifier = Modifier
 			.background(
@@ -100,7 +127,9 @@ fun LoadedState(
 		items(contacts, key = { it.id }) {contact ->
 			ContactItem(
 				contact = contact,
-				onContactedTodayClick = onContactedTodayClick
+				onContactedTodayClick = onContactedTodayClick,
+				onDeleteContact = onDeleteContact,
+				onLastContactedEditClick = onLastContactedEditClick
 			)
 		}
 	}
@@ -111,9 +140,11 @@ fun LoadedState(
 @Composable
 fun ContactItem(
 	//viewModel: PrmAppViewModel,
-    contact: Contact,
-    modifier: Modifier = Modifier,
-	onContactedTodayClick: (contactId: Long) -> Unit
+	contact: Contact,
+	modifier: Modifier = Modifier,
+	onContactedTodayClick: (contactId: Long) -> Unit,
+	onDeleteContact: (contactId: Long) -> Unit,
+	onLastContactedEditClick: (contactId: Long) -> Unit,
 ) {
 	var expanded by remember {
 		mutableStateOf(false)
@@ -129,15 +160,16 @@ fun ContactItem(
 
 	Card(
 		modifier = modifier
-			.fillMaxWidth()
 			.combinedClickable(
 				onLongClick = {
 					onContactedTodayClick(contact.id)
-					Toast.makeText(context, "${contact.name} contacted today", Toast.LENGTH_SHORT).show()
+					Toast
+						.makeText(context, "${contact.name} contacted today", Toast.LENGTH_SHORT)
+						.show()
 				},
 				onClick = { expanded = !expanded }
 			)
-			,
+			.fillMaxWidth(),
 		elevation = cardElevation(4.dp),
 		//onClick = { expanded = !expanded },
 		) {
@@ -153,7 +185,7 @@ fun ContactItem(
 		) {
 			Column(
 				modifier = Modifier
-					.weight(9f)
+					.weight(1f)
 					.padding(8.dp)
 			) {
 				BasicContactInfo(contact = contact)
@@ -162,23 +194,25 @@ fun ContactItem(
 				}
 			}
 			Column(
-				modifier = Modifier
-					.weight(7f)
-					.padding(4.dp),
 				verticalArrangement = Arrangement.spacedBy(6.dp),
 				horizontalAlignment = Alignment.End
 			) {
-				ContactCardButton(
-					text = stringResource(id = R.string.set_contacted_date),
-					onClick = {
-						Toast.makeText(context, "Set contacted Date", Toast.LENGTH_SHORT).show()
+				Row(
+					modifier = Modifier
+						.padding(4.dp),
+					horizontalArrangement = Arrangement.End
+				) {
+					IconButton(onClick = { onLastContactedEditClick(contact.id) }) {
+						Icon(Icons.Default.DateRange, contentDescription = "")
 					}
-				)
+					IconButton(onClick = { onContactedTodayClick(contact.id) }) {
+						Icon(Icons.Default.Done, contentDescription = "")
+					}
+				}
 				if (expanded) {
-					ContactCardButton(
-						text = stringResource(id = R.string.contacted_today),
-						onClick = { onContactedTodayClick(contact.id) }
-					)
+					IconButton(onClick = { onDeleteContact(contact.id) }) {
+						Icon(Icons.Default.Delete, contentDescription = "")
+					}
 				}
 			}
 		}

@@ -24,14 +24,11 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import cz.wz.jelinekp.prm.features.contacts.ui.components.LastContactedDatePicker
 import org.koin.androidx.compose.koinViewModel
-import java.time.Instant
 import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 
@@ -89,7 +86,7 @@ fun AddContactScreen(
                     .fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                AddContactTextField(
+                ContactTextField(
                     label = "Name",
                     inputText = screenState.contact.name,
                     onValueChange = { text -> viewModel.updateName(name = text) },
@@ -98,7 +95,7 @@ fun AddContactScreen(
                     keyboardActions = KeyboardActions(onNext = { countryFocusRequester.requestFocus() }),
                     modifier = Modifier.focusRequester(nameFocusRequester)
                 )
-                AddContactTextField(
+                ContactTextField(
                     label = "Country",
                     inputText = screenState.contact.country ?: "",
                     onValueChange = { text -> viewModel.updateCountry(country = text) },
@@ -107,7 +104,7 @@ fun AddContactScreen(
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                     modifier = Modifier.focusRequester(countryFocusRequester)
                 )
-                AddContactTextField(
+                ContactTextField(
                     label = "Contact method",
                     inputText = screenState.contact.contactMethod ?: "",
                     onValueChange = { text -> viewModel.updateContactMethod(contactMethod = text) },
@@ -116,7 +113,7 @@ fun AddContactScreen(
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                     modifier = Modifier.focusRequester(contactMethodFocusRequester)
                 )
-                AddContactTextField(
+                ContactTextField(
                     label = "Note",
                     inputText = screenState.contact.note ?: "",
                     onValueChange = { text -> viewModel.updateNote(note = text) },
@@ -176,7 +173,7 @@ fun AddContactScreen(
 
 
 @Composable
-fun AddContactTextField(
+fun ContactTextField(
     onValueChange: (text: String) -> Unit,
     modifier: Modifier = Modifier,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
@@ -210,7 +207,7 @@ fun ReadonlyTextField(
     modifier: Modifier = Modifier,
 ) {
     Box {
-        AddContactTextField(
+        ContactTextField(
             label = label,
             inputText = value,
             onValueChange = onValueChange,
@@ -225,35 +222,4 @@ fun ReadonlyTextField(
                 .clickable(onClick = onClick),
         )
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun LastContactedDatePicker(
-    initialDateTime: LocalDateTime,
-    onValueChange: (lastContacted: LocalDateTime) -> Unit
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        // Pre-select a date - converting initialDateTime to milliseconds
-        val datePickerState = rememberDatePickerState(
-            initialSelectedDateMillis = initialDateTime.toEpochSecond(
-                ZoneOffset.UTC
-            ) * 1000
-        )
-        DatePicker(
-            state = datePickerState,
-            modifier = Modifier,
-            )
-        val date = LocalDateTime.ofInstant(
-            Instant.ofEpochMilli(datePickerState.selectedDateMillis!!),
-            ZoneId.systemDefault()
-        )
-        onValueChange(date)
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    AddContactScreen()
 }

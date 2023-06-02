@@ -1,6 +1,5 @@
 package cz.wz.jelinekp.prm.features.contacts.data
 
-import cz.wz.jelinekp.prm.features.contacts.data.db.ContactDao
 import cz.wz.jelinekp.prm.features.contacts.domain.Contact
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
@@ -14,4 +13,6 @@ class ContactRepository(
 
 	suspend fun updateContactLastContacted(contactId: Long, lastContacted: LocalDateTime)
 	= contactLocalDataSource.updateLastContacted(contactId, lastContacted)
+
+	suspend fun deleteContact(contactId: Long) = contactLocalDataSource.deleteContact(contactId)
 }

@@ -16,6 +16,9 @@ class ContactListViewModel(
 	private val _screenStateStream = MutableStateFlow<ContactListScreenState>(ContactListScreenState.Loading)
 	val screenStateStream get() = _screenStateStream.asStateFlow()
 
+	private val _datePickerScreenStateStream = MutableStateFlow(DatePickerScreenState(showLastContactedDatePicker = null))
+	val datePickerScreenStateStream get() = _datePickerScreenStateStream.asStateFlow()
+
 	init {
 	    viewModelScope.launch {
 			val result = repository.getAllContactsFromRoom()
@@ -29,6 +32,20 @@ class ContactListViewModel(
 		}
 	}
 
+	fun deleteContact(contactId: Long) {
+		viewModelScope.launch {
+			repository.deleteContact(contactId = contactId)
+		}
+	}
+
+	fun showLastContactedDatePicker(contactId: Long) {
+		_datePickerScreenStateStream.value = _datePickerScreenStateStream.value.copy(showLastContactedDatePicker = contactId)
+	}
+
+	fun hideLastContactedDatePicker() {
+		_datePickerScreenStateStream.value = _datePickerScreenStateStream.value.copy(showLastContactedDatePicker = null)
+	}
+
 }
 
 sealed interface ContactListScreenState {
@@ -40,3 +57,7 @@ sealed interface ContactListScreenState {
 	) : ContactListScreenState
 
 }
+
+data class DatePickerScreenState(
+	val showLastContactedDatePicker: Long? = null
+)

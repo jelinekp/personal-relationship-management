@@ -18,7 +18,7 @@ interface ContactLocalDataSource {
 
     suspend fun insert(contacts: List<Contact>)
 
-    suspend fun deleteContact(contact: Contact)
+    suspend fun deleteContact(contactId: Long)
 
     suspend fun deleteAll()
 

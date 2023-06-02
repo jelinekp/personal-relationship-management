@@ -29,13 +29,6 @@ class MainActivity : ComponentActivity() {
 	}
 }
 
-/*class MainViewModelFactory(private val application: Application) :
-	ViewModelProvider.AndroidViewModelFactory() {
-	override fun <T : ViewModel> create(modelClass: Class<T>): T {
-		return PrmAppViewModel(application) as T
-	}
-}*/
-
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {

@@ -19,7 +19,7 @@ class ContactRoomDataSource(private val contactDao: ContactDao) : ContactLocalDa
 
     override suspend fun insert(contacts: List<Contact>) = contactDao.insert(contacts)
 
-    override suspend fun deleteContact(contact: Contact) = contactDao.delete(contact)
+    override suspend fun deleteContact(contactId: Long) = contactDao.deleteContactById(contactId)
 
     override suspend fun deleteAll() = contactDao.deleteAll()
 }
