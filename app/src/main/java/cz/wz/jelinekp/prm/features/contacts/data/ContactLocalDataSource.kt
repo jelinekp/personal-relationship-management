@@ -8,7 +8,7 @@ interface ContactLocalDataSource {
 
     fun getAllContacts(): Flow<List<Contact>>
 
-    fun getContact(id: Int): Flow<Contact?>
+    fun getContact(id: Long): Flow<Contact?>
 
     suspend fun insertContact(contact: Contact)
 

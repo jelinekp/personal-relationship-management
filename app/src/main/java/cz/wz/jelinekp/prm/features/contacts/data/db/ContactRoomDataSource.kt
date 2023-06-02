@@ -9,7 +9,7 @@ class ContactRoomDataSource(private val contactDao: ContactDao) : ContactLocalDa
 
     override fun getAllContacts(): Flow<List<Contact>> = contactDao.getAllContacts()
 
-    override fun getContact(id: Int): Flow<Contact?> = contactDao.getContact(id)
+    override fun getContact(id: Long): Flow<Contact?> = contactDao.getContact(id)
 
     override suspend fun insertContact(contact: Contact) = contactDao.insertContact(contact)
 

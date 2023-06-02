@@ -15,4 +15,6 @@ class ContactRepository(
 	= contactLocalDataSource.updateLastContacted(contactId, lastContacted)
 
 	suspend fun deleteContact(contactId: Long) = contactLocalDataSource.deleteContact(contactId)
+    fun getContactById(contactId: Long) = contactLocalDataSource.getContact(contactId)
+	suspend fun updateContact(contact: Contact) = contactLocalDataSource.updateContact(contact)
 }

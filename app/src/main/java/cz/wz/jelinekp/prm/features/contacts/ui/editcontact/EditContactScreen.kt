@@ -1,9 +1,6 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
-package cz.wz.jelinekp.prm.features.contacts.ui.addcontact
+package cz.wz.jelinekp.prm.features.contacts.ui.editcontact
 
 import android.widget.Toast
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,8 +13,19 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
@@ -31,11 +39,11 @@ import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddContactScreen(
-    viewModel: AddContactViewModel = koinViewModel()
+fun EditContactScreen(
+    navigateUp: () -> Unit,
+    viewModel: EditContactViewModel = koinViewModel()
 ) {
     val screenState by viewModel.screenStateStream.collectAsStateWithLifecycle()
 
@@ -52,17 +60,16 @@ fun AddContactScreen(
     } else if (screenState.nameError) {
         Toast.makeText(context, "Name field can't be empty", Toast.LENGTH_SHORT).show()
     }
-
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        text = "Add Contact",
+                        text = if (screenState.isAddingNewContact) "Add Contact" else "Edit contact",
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { /* TODO navigate back*/ }) {
+                    IconButton(onClick = navigateUp) {
                         Icon(
                             Icons.Default.Clear,
                             contentDescription = "Back icon"
@@ -71,7 +78,9 @@ fun AddContactScreen(
                 },
                 actions = {
                     Button(
-                        onClick = { viewModel.addContact() },
+                        onClick = { if (viewModel.applyChanges()) {
+                            navigateUp()
+                        } },
                     ) {
                         Text("Save")
                     }

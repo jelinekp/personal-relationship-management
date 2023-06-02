@@ -5,7 +5,7 @@ import cz.wz.jelinekp.prm.features.contacts.data.ContactLocalDataSource
 import cz.wz.jelinekp.prm.features.contacts.data.ContactRepository
 import cz.wz.jelinekp.prm.features.contacts.data.db.ContactRoomDataSource
 import cz.wz.jelinekp.prm.features.contacts.ui.list.ContactListViewModel
-import cz.wz.jelinekp.prm.features.contacts.ui.addcontact.AddContactViewModel
+import cz.wz.jelinekp.prm.features.contacts.ui.editcontact.EditContactViewModel
 import org.koin.androidx.viewmodel.dsl.viewModelOf
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
@@ -18,7 +18,7 @@ val contactModule get() = module {
     factoryOf(::ContactRepository)
 
     viewModelOf(::ContactListViewModel)
-    viewModelOf(::AddContactViewModel)
+    viewModelOf(::EditContactViewModel)
     // viewModelOf(::SearchViewModel)
 
 }

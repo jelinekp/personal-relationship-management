@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.material3.CardDefaults.cardElevation
 import androidx.compose.runtime.*
@@ -30,13 +31,14 @@ import cz.wz.jelinekp.prm.features.contacts.domain.Contact
 import cz.wz.jelinekp.prm.features.contacts.ui.components.PrmTopBar
 import org.koin.androidx.compose.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import cz.wz.jelinekp.prm.features.contacts.ui.components.LastContactedDatePicker
 import java.time.LocalDateTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContactsScreen(
-	onNavigateToAddContact: () -> Unit,
+	onNavigateToAddContact: (contactId: Long?) -> Unit,
 	listViewModel: ContactListViewModel = koinViewModel(),
 	modifier: Modifier = Modifier
 ) {
@@ -46,7 +48,7 @@ fun ContactsScreen(
 	Scaffold(
 		topBar = { PrmTopBar(stringResource(R.string.app_name)) },
 		floatingActionButtonPosition = FabPosition.End,
-		floatingActionButton = { AddContactFab (onClick = onNavigateToAddContact) },
+		floatingActionButton = { AddContactFab (onClick = { onNavigateToAddContact(null) }) },
 	) { paddingValues ->
 		Column(
 			modifier = Modifier
@@ -62,7 +64,8 @@ fun ContactsScreen(
 				).value,
 					onContactedTodayClick = listViewModel::updateLastContacted,
 					onDeleteContact = listViewModel::deleteContact,
-					onLastContactedEditClick = listViewModel::showLastContactedDatePicker
+					onLastContactedEditClick = listViewModel::showLastContactedDatePicker,
+					onEditContactClick = onNavigateToAddContact
 				)
 			}
 		}
@@ -113,6 +116,7 @@ fun LoadedState(
 	onContactedTodayClick: (contactId: Long) -> Unit,
 	onDeleteContact: (contactId: Long) -> Unit,
 	onLastContactedEditClick: (contactId: Long) -> Unit,
+	onEditContactClick: (contactId: Long) -> Unit,
 ) {
 	LazyColumn(
 		modifier = Modifier
@@ -129,7 +133,8 @@ fun LoadedState(
 				contact = contact,
 				onContactedTodayClick = onContactedTodayClick,
 				onDeleteContact = onDeleteContact,
-				onLastContactedEditClick = onLastContactedEditClick
+				onLastContactedEditClick = onLastContactedEditClick,
+				onEditContactClick = onEditContactClick,
 			)
 		}
 	}
@@ -145,6 +150,7 @@ fun ContactItem(
 	onContactedTodayClick: (contactId: Long) -> Unit,
 	onDeleteContact: (contactId: Long) -> Unit,
 	onLastContactedEditClick: (contactId: Long) -> Unit,
+	onEditContactClick: (contactId: Long) -> Unit,
 ) {
 	var expanded by remember {
 		mutableStateOf(false)
@@ -194,7 +200,6 @@ fun ContactItem(
 				}
 			}
 			Column(
-				verticalArrangement = Arrangement.spacedBy(6.dp),
 				horizontalAlignment = Alignment.End
 			) {
 				Row(
@@ -210,8 +215,16 @@ fun ContactItem(
 					}
 				}
 				if (expanded) {
-					IconButton(onClick = { onDeleteContact(contact.id) }) {
-						Icon(Icons.Default.Delete, contentDescription = "")
+					Row(
+						modifier = Modifier.padding(4.dp),
+						horizontalArrangement = Arrangement.End
+					) {
+						IconButton(onClick = { onEditContactClick(contact.id) }) {
+							Icon(Icons.Default.Edit, contentDescription = "")
+						}
+						IconButton(onClick = { onDeleteContact(contact.id) }) {
+							Icon(Icons.Default.Delete, contentDescription = "")
+						}
 					}
 				}
 			}
