@@ -7,9 +7,9 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import cz.wz.jelinekp.prm.features.contacts.data.db.ContactDao
 import cz.wz.jelinekp.prm.features.contacts.data.db.Converters
-import cz.wz.jelinekp.prm.features.contacts.domain.Contact
+import cz.wz.jelinekp.prm.features.contacts.data.db.DbContact
 
-@Database(entities = [Contact::class], version = 4)
+@Database(entities = [DbContact::class], version = 4)
 @TypeConverters(Converters::class)
 abstract class ContactDb : RoomDatabase() {
 
@@ -21,7 +21,7 @@ abstract class ContactDb : RoomDatabase() {
 			ContactDb::class.java,
 			"contacts"
 		)
-			.fallbackToDestructiveMigration()
+			//.fallbackToDestructiveMigration()
 			//.createFromAsset("database/contacts.db")
 			.build()
 	}

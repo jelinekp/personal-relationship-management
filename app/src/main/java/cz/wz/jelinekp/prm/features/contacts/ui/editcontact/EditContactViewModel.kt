@@ -7,7 +7,9 @@ import cz.wz.jelinekp.prm.features.contacts.data.ContactRepository
 import cz.wz.jelinekp.prm.features.contacts.domain.Contact
 import cz.wz.jelinekp.prm.navigation.Screen
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
@@ -23,6 +25,9 @@ class EditContactViewModel(
         EditContactScreenState(Contact.emptyContact, false)
     )
     val screenStateStream get() = _screenStateStream.asStateFlow()
+
+    private val _validationSharedFlowStream = MutableSharedFlow<EditContactValidationState>()
+    val validationSharedFlowStream get() = _validationSharedFlowStream.asSharedFlow()
 
     init {
         viewModelScope.launch {
@@ -42,16 +47,19 @@ class EditContactViewModel(
                     it.copy(contact = contact!!)
                 }
             }
-
         }
     }
 
     private fun validateInputs() : Boolean {
         if (_screenStateStream.value.contact.lastContacted >= LocalDateTime.now()) {
-            _screenStateStream.value = _screenStateStream.value.copy(lastContactedError = true)
+            viewModelScope.launch {
+                _validationSharedFlowStream.emit(EditContactValidationState(lastContactedError = true))
+            }
             return false
         } else if (_screenStateStream.value.contact.name.isBlank()) {
-            _screenStateStream.value = _screenStateStream.value.copy(nameError = true)
+            viewModelScope.launch {
+                _validationSharedFlowStream.emit(EditContactValidationState(nameError = true))
+            }
             return false
         }
         return true
@@ -74,7 +82,9 @@ class EditContactViewModel(
     }
 
     fun updateName(name: String) {
-        _screenStateStream.value = _screenStateStream.value.copy(nameError = false)
+        viewModelScope.launch {
+            _validationSharedFlowStream.emit(EditContactValidationState(nameError = false))
+        }
         updateContactState(_screenStateStream.value.contact.copy(name = name))
     }
 
@@ -91,7 +101,9 @@ class EditContactViewModel(
     }
 
     fun updateLastContacted(lastContacted: LocalDateTime) {
-        _screenStateStream.value = _screenStateStream.value.copy(lastContactedError = false)
+        viewModelScope.launch {
+            _validationSharedFlowStream.emit(EditContactValidationState(lastContactedError = false))
+        }
         updateContactState(_screenStateStream.value.contact.copy(lastContacted = lastContacted))
     }
 
@@ -109,6 +121,9 @@ data class EditContactScreenState(
     val contact: Contact,
     val showLastContactedDatePicker: Boolean,
     val isAddingNewContact: Boolean = false,
+)
+
+data class EditContactValidationState(
     val nameError: Boolean = false,
     val countryError: Boolean = false,
     val contactMethodError: Boolean = false,

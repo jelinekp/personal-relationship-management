@@ -1,7 +1,10 @@
 package cz.wz.jelinekp.prm.features.contacts.ui.editcontact
 
 import android.widget.Toast
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.ScrollableState
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Clear
@@ -32,9 +36,11 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cz.wz.jelinekp.prm.features.contacts.ui.components.LastContactedDatePicker
+import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -46,6 +52,9 @@ fun EditContactScreen(
     viewModel: EditContactViewModel = koinViewModel()
 ) {
     val screenState by viewModel.screenStateStream.collectAsStateWithLifecycle()
+    val validationFlow by viewModel.validationSharedFlowStream.collectAsStateWithLifecycle(
+        initialValue = EditContactValidationState()
+    )
 
     val nameFocusRequester = remember { FocusRequester() }
     val countryFocusRequester = remember { FocusRequester() }
@@ -55,9 +64,9 @@ fun EditContactScreen(
 
     val context = LocalContext.current
 
-    if (screenState.lastContactedError) {
+    if (validationFlow.lastContactedError) {
         Toast.makeText(context, "Last contacted date can't be in the future", Toast.LENGTH_SHORT).show()
-    } else if (screenState.nameError) {
+    } else if (validationFlow.nameError) {
         Toast.makeText(context, "Name field can't be empty", Toast.LENGTH_SHORT).show()
     }
     Scaffold(
@@ -78,6 +87,7 @@ fun EditContactScreen(
                 },
                 actions = {
                     Button(
+                        modifier = Modifier.padding(end = 4.dp),
                         onClick = { if (viewModel.applyChanges()) {
                             navigateUp()
                         } },
@@ -92,14 +102,15 @@ fun EditContactScreen(
                 modifier = Modifier
                     .padding(paddingValues)
                     .padding(horizontal = 10.dp)
-                    .fillMaxSize(),
+                    .fillMaxSize()
+                    .verticalScroll(state = ScrollState(0)),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 ContactTextField(
                     label = "Name",
                     inputText = screenState.contact.name,
                     onValueChange = { text -> viewModel.updateName(name = text) },
-                    isError = screenState.nameError,
+                    isError = validationFlow.nameError,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                     keyboardActions = KeyboardActions(onNext = { countryFocusRequester.requestFocus() }),
                     modifier = Modifier.focusRequester(nameFocusRequester)
@@ -108,7 +119,7 @@ fun EditContactScreen(
                     label = "Country",
                     inputText = screenState.contact.country ?: "",
                     onValueChange = { text -> viewModel.updateCountry(country = text) },
-                    isError = screenState.countryError,
+                    isError = validationFlow.countryError,
                     keyboardActions = KeyboardActions(onNext = { contactMethodFocusRequester.requestFocus() }),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                     modifier = Modifier.focusRequester(countryFocusRequester)
@@ -117,7 +128,7 @@ fun EditContactScreen(
                     label = "Contact method",
                     inputText = screenState.contact.contactMethod ?: "",
                     onValueChange = { text -> viewModel.updateContactMethod(contactMethod = text) },
-                    isError = screenState.contactMethodError,
+                    isError = validationFlow.contactMethodError,
                     keyboardActions = KeyboardActions(onNext = { noteFocusRequester.requestFocus() }),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                     modifier = Modifier.focusRequester(contactMethodFocusRequester)
@@ -127,7 +138,7 @@ fun EditContactScreen(
                     inputText = screenState.contact.note ?: "",
                     onValueChange = { text -> viewModel.updateNote(note = text) },
                     singleLine = false,
-                    isError = screenState.noteError,
+                    isError = validationFlow.noteError,
                     keyboardActions = KeyboardActions(onNext = {
                         lastContactedFocusRequester.requestFocus()
                         viewModel.showLastContactedDatePicker()
@@ -141,7 +152,7 @@ fun EditContactScreen(
                     onValueChange = {},
                     onClick = { viewModel.showLastContactedDatePicker() },
                     label = "Last contacted date",
-                    isError = screenState.lastContactedError,
+                    isError = validationFlow.lastContactedError,
                     modifier = Modifier.focusRequester(lastContactedFocusRequester),
                 )
 
@@ -201,7 +212,7 @@ fun ContactTextField(
         isError = isError,
         singleLine = singleLine,
         keyboardActions = keyboardActions,
-        keyboardOptions = keyboardOptions,
+        keyboardOptions = keyboardOptions.copy(capitalization = KeyboardCapitalization.Words),
         trailingIcon = trailingIcon
     )
 }

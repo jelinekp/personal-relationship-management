@@ -6,6 +6,7 @@ import cz.wz.jelinekp.prm.features.contacts.domain.Contact
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
@@ -19,10 +20,13 @@ class ContactListViewModel(
 	private val _datePickerScreenStateStream = MutableStateFlow(DatePickerScreenState(showLastContactedDatePicker = null))
 	val datePickerScreenStateStream get() = _datePickerScreenStateStream.asStateFlow()
 
+	/*private val _expandedContactsScreenState = MutableStateFlow(ExpandedContactsScreenState())*/
+
 	init {
 	    viewModelScope.launch {
-			val result = repository.getAllContactsFromRoom()
-			_screenStateStream.value = ContactListScreenState.Loaded(result)
+			repository.getAllContactsFromRoom().collectLatest {
+				_screenStateStream.value = ContactListScreenState.Loaded(it)
+			}
 		}
 	}
 
@@ -53,11 +57,15 @@ sealed interface ContactListScreenState {
 	object Loading : ContactListScreenState
 
 	data class Loaded(
-		val contacts: Flow<List<Contact>>
+		val contacts: List<Contact>
 	) : ContactListScreenState
 
 }
 
 data class DatePickerScreenState(
 	val showLastContactedDatePicker: Long? = null
+)
+
+data class ExpandedContactsScreenState(
+	val expandedContacts: Map<Long, Boolean>
 )
