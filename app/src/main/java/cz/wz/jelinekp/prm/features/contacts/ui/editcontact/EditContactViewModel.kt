@@ -4,7 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cz.wz.jelinekp.prm.features.contacts.data.ContactRepository
-import cz.wz.jelinekp.prm.features.contacts.domain.Contact
+import cz.wz.jelinekp.prm.features.contacts.model.Categories
+import cz.wz.jelinekp.prm.features.contacts.model.Contact
 import cz.wz.jelinekp.prm.navigation.Screen
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -63,7 +64,7 @@ class EditContactViewModel(
                 _validationSharedFlowStream.emit(EditContactValidationState(isNameError = true))
             }
             return false
-        } else if (_screenStateStream.value.contact.category.isBlank()) {
+        } else if (_screenStateStream.value.contact.category.isEmpty()) {
             viewModelScope.launch {
                 _validationSharedFlowStream.emit(EditContactValidationState(isCategoryError = true))
             }
@@ -94,7 +95,7 @@ class EditContactViewModel(
         updateContactState(_screenStateStream.value.contact.copy(name = name))
     }
 
-    fun updateCategory(category: String) {
+    fun updateCategory(category: List<Categories>) {
         viewModelScope.launch {
             _validationSharedFlowStream.emit(EditContactValidationState(isCategoryError = false))
         }

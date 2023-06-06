@@ -1,7 +1,7 @@
 package cz.wz.jelinekp.prm.features.contacts.data.firebase
 
 import com.google.firebase.database.FirebaseDatabase
-import cz.wz.jelinekp.prm.features.contacts.domain.Contact
+import cz.wz.jelinekp.prm.features.contacts.model.Contact
 
 class FirebaseDataStore(
     private val firebaseDatabase: FirebaseDatabase,
