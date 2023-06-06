@@ -10,22 +10,19 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.core.view.WindowCompat
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import cz.wz.jelinekp.prm.navigation.PrmNavHost
 import cz.wz.jelinekp.prm.core.ui.theme.PersonalRelationshipManagementTheme
+import cz.wz.jelinekp.prm.navigation.PrmNavHost
 
 class MainActivity : ComponentActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContent {
 			PersonalRelationshipManagementTheme {
-
 				val systemUiController = rememberSystemUiController()
 				val appBackgroundColor = MaterialTheme.colorScheme.background
-				val appNavBarColor = Color.Transparent
+				val appNavBarColor = MaterialTheme.colorScheme.background
 				val useDarkIcons = !isSystemInDarkTheme()
 
 				SideEffect {

@@ -4,10 +4,10 @@ import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import cz.wz.jelinekp.prm.features.contacts.data.firebase.FirebaseContact
 import cz.wz.jelinekp.prm.features.contacts.domain.Contact
 import kotlinx.parcelize.Parcelize
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 @Entity(tableName = "contact")
 @Parcelize
@@ -18,6 +18,8 @@ data class DbContact (
 
     val name: String,
 
+    val category: String,
+
     @ColumnInfo(name = "last_contacted")
     val lastContacted: LocalDateTime = LocalDateTime.now(),
 
@@ -26,18 +28,30 @@ data class DbContact (
     @ColumnInfo(name = "contact_method")
     val contactMethod: String?,
 
-    val note: String?
-) : Parcelable {
+    val note: String?,
 
-    val createdDateFormatted : String
-        get() = lastContacted.format(DateTimeFormatter.ofPattern("d. L. yyyy"))
+    val modified: LocalDateTime = LocalDateTime.now(),
+
+) : Parcelable {
 
     fun toContact() = Contact(
         id = id,
         name = name,
+        category = category,
         lastContacted = lastContacted,
         country = country,
         contactMethod = contactMethod,
         note = note,
+    )
+
+    fun toFirebaseContact() = FirebaseContact(
+        id = id,
+        name = name,
+        category = category,
+        lastContacted = lastContacted,
+        country = country,
+        contactMethod = contactMethod,
+        note = note,
+        modified = modified,
     )
 }

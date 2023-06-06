@@ -3,8 +3,6 @@ package cz.wz.jelinekp.prm.features.contacts.ui.editcontact
 import android.widget.Toast
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.ScrollableState
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +17,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,7 +39,6 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cz.wz.jelinekp.prm.features.contacts.ui.components.LastContactedDatePicker
-import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -52,6 +50,7 @@ fun EditContactScreen(
     viewModel: EditContactViewModel = koinViewModel()
 ) {
     val screenState by viewModel.screenStateStream.collectAsStateWithLifecycle()
+    val formState by viewModel.editContactFormSate.collectAsStateWithLifecycle()
     val validationFlow by viewModel.validationSharedFlowStream.collectAsStateWithLifecycle(
         initialValue = EditContactValidationState()
     )
@@ -64,11 +63,14 @@ fun EditContactScreen(
 
     val context = LocalContext.current
 
-    if (validationFlow.lastContactedError) {
-        Toast.makeText(context, "Last contacted date can't be in the future", Toast.LENGTH_SHORT).show()
-    } else if (validationFlow.nameError) {
+    if (validationFlow.isLastContactedError)
+        Toast.makeText(context, "Last contacted date can't be in the future", Toast.LENGTH_SHORT)
+            .show()
+    else if (validationFlow.isNameError)
         Toast.makeText(context, "Name field can't be empty", Toast.LENGTH_SHORT).show()
-    }
+    else if (validationFlow.isCategoryError)
+        Toast.makeText(context, "Wrong category", Toast.LENGTH_SHORT).show()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -88,9 +90,11 @@ fun EditContactScreen(
                 actions = {
                     Button(
                         modifier = Modifier.padding(end = 4.dp),
-                        onClick = { if (viewModel.applyChanges()) {
-                            navigateUp()
-                        } },
+                        onClick = {
+                            if (viewModel.applyChanges()) {
+                                navigateUp()
+                            }
+                        },
                     ) {
                         Text("Save")
                     }
@@ -110,27 +114,42 @@ fun EditContactScreen(
                     label = "Name",
                     inputText = screenState.contact.name,
                     onValueChange = { text -> viewModel.updateName(name = text) },
-                    isError = validationFlow.nameError,
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                    isError = validationFlow.isNameError,
                     keyboardActions = KeyboardActions(onNext = { countryFocusRequester.requestFocus() }),
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Next,
+                        capitalization = KeyboardCapitalization.Words
+                    ),
                     modifier = Modifier.focusRequester(nameFocusRequester)
                 )
+                DropdownMenu(
+                    expanded = formState.isCategoryDropDownExpanded,
+                    onDismissRequest = { viewModel.showCategoryDropDown(isExpanded = false) }
+                ) {
+
+                }
                 ContactTextField(
                     label = "Country",
                     inputText = screenState.contact.country ?: "",
                     onValueChange = { text -> viewModel.updateCountry(country = text) },
-                    isError = validationFlow.countryError,
+                    isError = validationFlow.isCountryError,
                     keyboardActions = KeyboardActions(onNext = { contactMethodFocusRequester.requestFocus() }),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Next,
+                        capitalization = KeyboardCapitalization.Words
+                    ),
                     modifier = Modifier.focusRequester(countryFocusRequester)
                 )
                 ContactTextField(
                     label = "Contact method",
                     inputText = screenState.contact.contactMethod ?: "",
                     onValueChange = { text -> viewModel.updateContactMethod(contactMethod = text) },
-                    isError = validationFlow.contactMethodError,
+                    isError = validationFlow.isContactMethodError,
                     keyboardActions = KeyboardActions(onNext = { noteFocusRequester.requestFocus() }),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Next,
+                        capitalization = KeyboardCapitalization.Sentences
+                    ),
                     modifier = Modifier.focusRequester(contactMethodFocusRequester)
                 )
                 ContactTextField(
@@ -138,40 +157,45 @@ fun EditContactScreen(
                     inputText = screenState.contact.note ?: "",
                     onValueChange = { text -> viewModel.updateNote(note = text) },
                     singleLine = false,
-                    isError = validationFlow.noteError,
+                    isError = validationFlow.isNoteError,
                     keyboardActions = KeyboardActions(onNext = {
                         lastContactedFocusRequester.requestFocus()
-                        viewModel.showLastContactedDatePicker()
+                        viewModel.showLastContactedDatePicker(isShowing = true)
                     }),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Next,
+                        capitalization = KeyboardCapitalization.Sentences
+                    ),
                     modifier = Modifier.focusRequester(noteFocusRequester)
                 )
 
                 ReadonlyTextField(
-                    value = screenState.contact.lastContacted.format(DateTimeFormatter.ofPattern("d. L. yyyy")).toString(),
+                    value = screenState.contact.lastContacted.format(DateTimeFormatter.ofPattern("d. L. yyyy"))
+                        .toString(),
                     onValueChange = {},
-                    onClick = { viewModel.showLastContactedDatePicker() },
+                    onClick = { viewModel.showLastContactedDatePicker(isShowing = true) },
                     label = "Last contacted date",
-                    isError = validationFlow.lastContactedError,
+                    isError = validationFlow.isLastContactedError,
                     modifier = Modifier.focusRequester(lastContactedFocusRequester),
                 )
 
 
-                if (screenState.showLastContactedDatePicker) {
+                if (screenState.isShowingLastContactedDatePicker) {
                     DatePickerDialog(
                         onDismissRequest = {
                             viewModel.updateLastContacted(LocalDateTime.now())
-                            viewModel.hideLastContactedDatePicker()
+                            viewModel.showLastContactedDatePicker(isShowing = false)
                         },
                         confirmButton = {
-                            TextButton(onClick = { viewModel.hideLastContactedDatePicker() }) {
+                            TextButton(onClick = { viewModel.showLastContactedDatePicker(isShowing = false) }) {
                                 Text(text = "OK")
                             }
                         },
                         dismissButton = {
                             TextButton(onClick = {
                                 viewModel.updateLastContacted(LocalDateTime.now())
-                                viewModel.hideLastContactedDatePicker() }) {
+                                viewModel.showLastContactedDatePicker(isShowing = false)
+                            }) {
                                 Text(text = "Cancel")
                             }
                         }
@@ -212,8 +236,8 @@ fun ContactTextField(
         isError = isError,
         singleLine = singleLine,
         keyboardActions = keyboardActions,
-        keyboardOptions = keyboardOptions.copy(capitalization = KeyboardCapitalization.Words),
-        trailingIcon = trailingIcon
+        keyboardOptions = keyboardOptions,
+        trailingIcon = trailingIcon,
     )
 }
 
@@ -233,7 +257,7 @@ fun ReadonlyTextField(
             onValueChange = onValueChange,
             isError = isError,
             modifier = modifier,
-            trailingIcon = { Icon(Icons.Default.ArrowDropDown, contentDescription = "Dropdown") }
+            trailingIcon = { Icon(Icons.Default.ArrowDropDown, contentDescription = "Dropdown") },
         )
         Box(
             modifier = Modifier

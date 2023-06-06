@@ -27,8 +27,8 @@ interface ContactDao {
 	@Update
 	suspend fun updateContact(contact: DbContact)
 
-	@Query("UPDATE contact SET last_contacted = :lastContacted WHERE id = :contactId")
-	suspend fun updateLastContacted(contactId: Long, lastContacted: LocalDateTime)
+	@Query("UPDATE contact SET last_contacted = :lastContacted, modified = :modified WHERE id = :contactId")
+	suspend fun updateLastContacted(contactId: Long, lastContacted: LocalDateTime, modified: LocalDateTime)
 
 	@Delete
 	suspend fun delete(contact: DbContact)

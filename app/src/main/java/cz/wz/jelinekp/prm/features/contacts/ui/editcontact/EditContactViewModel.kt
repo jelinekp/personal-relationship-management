@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import cz.wz.jelinekp.prm.features.contacts.data.ContactRepository
 import cz.wz.jelinekp.prm.features.contacts.domain.Contact
 import cz.wz.jelinekp.prm.navigation.Screen
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -28,6 +27,9 @@ class EditContactViewModel(
 
     private val _validationSharedFlowStream = MutableSharedFlow<EditContactValidationState>()
     val validationSharedFlowStream get() = _validationSharedFlowStream.asSharedFlow()
+
+    private val _editContactFormState = MutableStateFlow(EditContactFormSate())
+    val editContactFormSate get() =  _editContactFormState.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -53,14 +55,18 @@ class EditContactViewModel(
     private fun validateInputs() : Boolean {
         if (_screenStateStream.value.contact.lastContacted >= LocalDateTime.now()) {
             viewModelScope.launch {
-                _validationSharedFlowStream.emit(EditContactValidationState(lastContactedError = true))
+                _validationSharedFlowStream.emit(EditContactValidationState(isLastContactedError = true))
             }
             return false
         } else if (_screenStateStream.value.contact.name.isBlank()) {
             viewModelScope.launch {
-                _validationSharedFlowStream.emit(EditContactValidationState(nameError = true))
+                _validationSharedFlowStream.emit(EditContactValidationState(isNameError = true))
             }
             return false
+        } else if (_screenStateStream.value.contact.category.isBlank()) {
+            viewModelScope.launch {
+                _validationSharedFlowStream.emit(EditContactValidationState(isCategoryError = true))
+            }
         }
         return true
     }
@@ -83,9 +89,16 @@ class EditContactViewModel(
 
     fun updateName(name: String) {
         viewModelScope.launch {
-            _validationSharedFlowStream.emit(EditContactValidationState(nameError = false))
+            _validationSharedFlowStream.emit(EditContactValidationState(isNameError = false))
         }
         updateContactState(_screenStateStream.value.contact.copy(name = name))
+    }
+
+    fun updateCategory(category: String) {
+        viewModelScope.launch {
+            _validationSharedFlowStream.emit(EditContactValidationState(isCategoryError = false))
+        }
+        updateContactState(_screenStateStream.value.contact.copy(category = category))
     }
 
     fun updateCountry(country: String) {
@@ -102,31 +115,39 @@ class EditContactViewModel(
 
     fun updateLastContacted(lastContacted: LocalDateTime) {
         viewModelScope.launch {
-            _validationSharedFlowStream.emit(EditContactValidationState(lastContactedError = false))
+            _validationSharedFlowStream.emit(EditContactValidationState(isLastContactedError = false))
         }
         updateContactState(_screenStateStream.value.contact.copy(lastContacted = lastContacted))
     }
 
-    fun showLastContactedDatePicker() {
-        _screenStateStream.value = _screenStateStream.value.copy(showLastContactedDatePicker = true)
+    fun showCategoryDropDown(isExpanded: Boolean) {
+        _editContactFormState.update {
+            it.copy(isCategoryDropDownExpanded = isExpanded)
+        }
     }
 
-    fun hideLastContactedDatePicker() {
-        _screenStateStream.value = _screenStateStream.value.copy(showLastContactedDatePicker = false)
+    fun showLastContactedDatePicker(isShowing: Boolean) {
+        _screenStateStream.value = _screenStateStream.value.copy(isShowingLastContactedDatePicker = isShowing)
     }
 
 }
 
 data class EditContactScreenState(
     val contact: Contact,
-    val showLastContactedDatePicker: Boolean,
+    val isShowingLastContactedDatePicker: Boolean,
     val isAddingNewContact: Boolean = false,
 )
 
 data class EditContactValidationState(
-    val nameError: Boolean = false,
-    val countryError: Boolean = false,
-    val contactMethodError: Boolean = false,
-    val noteError: Boolean = false,
-    val lastContactedError: Boolean = false,
+    val isNameError: Boolean = false,
+    val isCategoryError: Boolean = false,
+    val isCountryError: Boolean = false,
+    val isContactMethodError: Boolean = false,
+    val isNoteError: Boolean = false,
+    val isLastContactedError: Boolean = false,
+)
+
+data class EditContactFormSate(
+    val isCategoryDropDownExpanded: Boolean = false,
+
 )

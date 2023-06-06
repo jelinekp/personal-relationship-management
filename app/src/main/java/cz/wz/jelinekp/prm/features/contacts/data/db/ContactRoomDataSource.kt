@@ -17,8 +17,8 @@ class ContactRoomDataSource(private val contactDao: ContactDao) : ContactLocalDa
     override suspend fun insertContact(contact: Contact) = contactDao.insertContact(contact.toDbContact())
 
     override suspend fun updateContact(contact: Contact) = contactDao.updateContact(contact.toDbContact())
-    override suspend fun updateLastContacted(contactId: Long, lastContacted: LocalDateTime)
-    = contactDao.updateLastContacted(contactId, lastContacted)
+    override suspend fun updateLastContacted(contactId: Long, lastContacted: LocalDateTime, modified: LocalDateTime)
+    = contactDao.updateLastContacted(contactId, lastContacted, modified)
 
     override suspend fun insert(contacts: List<Contact>) = contactDao.insert(contacts.map { it.toDbContact() })
 

@@ -1,47 +1,11 @@
 {
   "project_info": {
     "project_number": "792469487528",
+    "firebase_url": "https://personal-relations-management-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "personal-relations-management",
     "storage_bucket": "personal-relations-management.appspot.com"
   },
   "client": [
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:792469487528:android:caed9fc414f3fa34d2279d",
-        "android_client_info": {
-          "package_name": "cz.wz.jelinekp.personalrelationshipmanagement"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "792469487528-0gnal9kj8tq8mghd5kj7rdonsb3kvkp7.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "cz.wz.jelinekp.personalrelationshipmanagement",
-            "certificate_hash": "66cb6ff2d442b3d3625e96d5da1d8d9274b7da15"
-          }
-        },
-        {
-          "client_id": "792469487528-0h132gqsoqrnprp300pd8l9fgas1ggrr.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBxSbVtsVKXISFlAKNdwemlbAXGvDM-wfw"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "792469487528-0h132gqsoqrnprp300pd8l9fgas1ggrr.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
-        }
-      }
-    },
     {
       "client_info": {
         "mobilesdk_app_id": "1:792469487528:android:78f2ace6567c8235d2279d",
