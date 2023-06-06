@@ -1,7 +1,7 @@
 package cz.wz.jelinekp.prm.features.contacts.data.db
 
 import cz.wz.jelinekp.prm.features.contacts.data.ContactLocalDataSource
-import cz.wz.jelinekp.prm.features.contacts.domain.Contact
+import cz.wz.jelinekp.prm.features.contacts.model.Contact
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.time.LocalDateTime

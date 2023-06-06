@@ -6,4 +6,5 @@
     <string name="country">Country: %s</string>
     <string name="note">Note: %s</string>
     <string name="contactMethod">Contact method: %s</string>
+    <string name="title_activity_sign_in">Sign In</string>
 </resources>

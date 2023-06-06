@@ -9,7 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import cz.wz.jelinekp.prm.features.contacts.ui.editcontact.EditContactScreen
-import cz.wz.jelinekp.prm.features.contacts.ui.list.ContactsScreen
+import cz.wz.jelinekp.prm.features.contacts.ui.list.ContactListScreen
 
 @Composable
 fun PrmNavHost(
@@ -23,7 +23,7 @@ fun PrmNavHost(
         startDestination = startDestination
     ) {
         composable(Screen.ContactsScreen.route) {
-            ContactsScreen(
+            ContactListScreen(
                 onNavigateToAddContact = { navController.navigate(Screen.EditContactScreen(it.toString()).route) }
             )
         }

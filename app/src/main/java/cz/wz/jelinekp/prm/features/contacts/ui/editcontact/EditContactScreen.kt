@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -126,7 +127,8 @@ fun EditContactScreen(
                     expanded = formState.isCategoryDropDownExpanded,
                     onDismissRequest = { viewModel.showCategoryDropDown(isExpanded = false) }
                 ) {
-
+                    DropdownMenuItem(text = { Text(text = "Family") }, onClick = { viewModel.updateCategory()
+                    ) })
                 }
                 ContactTextField(
                     label = "Country",

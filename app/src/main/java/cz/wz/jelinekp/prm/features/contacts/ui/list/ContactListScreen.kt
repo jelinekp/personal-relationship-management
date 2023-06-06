@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.material3.CardDefaults.cardElevation
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -27,7 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cz.wz.jelinekp.prm.R
-import cz.wz.jelinekp.prm.features.contacts.domain.Contact
+import cz.wz.jelinekp.prm.features.contacts.model.Contact
 import cz.wz.jelinekp.prm.features.contacts.ui.components.LastContactedDatePicker
 import cz.wz.jelinekp.prm.features.contacts.ui.components.PrmTopBar
 import org.koin.androidx.compose.koinViewModel
@@ -35,7 +36,7 @@ import java.time.LocalDateTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ContactsScreen(
+fun ContactListScreen(
 	onNavigateToAddContact: (contactId: Long?) -> Unit,
 	modifier: Modifier = Modifier,
 	listViewModel: ContactListViewModel = koinViewModel()
@@ -137,7 +138,7 @@ fun LoadedState(
 		}
 		Spacer(modifier = Modifier.height(192.dp))
 	}
-	/* I don't know why but the LazyColumn is just slow as fuck and even forgets the state on each scroll
+	/* The LazyColumn is just slow as fuck and even forgets the state on each scroll
 	LazyColumn(
 		modifier = Modifier
 			.background(
@@ -148,7 +149,7 @@ fun LoadedState(
 		verticalArrangement = Arrangement.spacedBy(12.dp),
 		contentPadding = PaddingValues(bottom = 192.dp, top = 8.dp)
 	) {
-		items(contacts, key = { it.id }) {contact ->
+		items(contacts, key = { it.id }) { contact ->
 			ContactItem(
 				contact = contact,
 				onContactedTodayClick = onContactedTodayClick,
@@ -171,7 +172,7 @@ fun ContactItem(
 	onLastContactedEditClick: (contactId: Long) -> Unit,
 	onEditContactClick: (contactId: Long) -> Unit,
 ) {
-	var expanded by remember {
+	var expanded by rememberSaveable { // TODO extract this to viewModel
 		mutableStateOf(false)
 	}
 
@@ -324,7 +325,7 @@ fun AddContactFab(
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
-	ContactsScreen(
+	ContactListScreen(
 		{}
 	)
 }

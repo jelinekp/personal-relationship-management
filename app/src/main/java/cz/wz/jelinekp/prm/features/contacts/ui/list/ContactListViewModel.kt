@@ -1,9 +1,9 @@
 package cz.wz.jelinekp.prm.features.contacts.ui.list
 
-import androidx.lifecycle.*
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import cz.wz.jelinekp.prm.features.contacts.data.ContactRepository
-import cz.wz.jelinekp.prm.features.contacts.domain.Contact
-import kotlinx.coroutines.flow.Flow
+import cz.wz.jelinekp.prm.features.contacts.model.Contact
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest

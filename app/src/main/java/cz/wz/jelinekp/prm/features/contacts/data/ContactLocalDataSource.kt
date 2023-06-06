@@ -1,6 +1,6 @@
 package cz.wz.jelinekp.prm.features.contacts.data
 
-import cz.wz.jelinekp.prm.features.contacts.domain.Contact
+import cz.wz.jelinekp.prm.features.contacts.model.Contact
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
 
