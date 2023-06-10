@@ -4,8 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cz.wz.jelinekp.prm.features.contacts.data.ContactRepository
-import cz.wz.jelinekp.prm.features.contacts.model.Categories
 import cz.wz.jelinekp.prm.features.contacts.model.Contact
+import cz.wz.jelinekp.prm.features.contacts.model.ContactCategory
 import cz.wz.jelinekp.prm.navigation.Screen
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,15 +22,12 @@ class EditContactViewModel(
 ) : ViewModel() {
 
     private val _screenStateStream = MutableStateFlow<EditContactScreenState>(
-        EditContactScreenState(Contact.emptyContact, false)
+        EditContactScreenState(Contact.emptyContact)
     )
     val screenStateStream get() = _screenStateStream.asStateFlow()
 
     private val _validationSharedFlowStream = MutableSharedFlow<EditContactValidationState>()
     val validationSharedFlowStream get() = _validationSharedFlowStream.asSharedFlow()
-
-    private val _editContactFormState = MutableStateFlow(EditContactFormSate())
-    val editContactFormSate get() =  _editContactFormState.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -64,10 +61,6 @@ class EditContactViewModel(
                 _validationSharedFlowStream.emit(EditContactValidationState(isNameError = true))
             }
             return false
-        } else if (_screenStateStream.value.contact.category.isEmpty()) {
-            viewModelScope.launch {
-                _validationSharedFlowStream.emit(EditContactValidationState(isCategoryError = true))
-            }
         }
         return true
     }
@@ -95,12 +88,13 @@ class EditContactViewModel(
         updateContactState(_screenStateStream.value.contact.copy(name = name))
     }
 
-    fun updateCategory(category: Categories) {
-        viewModelScope.launch {
-            _validationSharedFlowStream.emit(EditContactValidationState(isCategoryError = false))
-        }
-        val newCategories = _screenStateStream.value.contact.category + category
-        updateContactState(_screenStateStream.value.contact.copy(category = newCategories))
+    fun updateCategory(category: ContactCategory) {
+        val newCategories = if (_screenStateStream.value.contact.categories.contains(category))
+            _screenStateStream.value.contact.categories - category
+        else
+            _screenStateStream.value.contact.categories + category
+
+        updateContactState(_screenStateStream.value.contact.copy(categories = newCategories))
     }
 
     fun updateCountry(country: String) {
@@ -122,22 +116,38 @@ class EditContactViewModel(
         updateContactState(_screenStateStream.value.contact.copy(lastContacted = lastContacted))
     }
 
-    fun showCategoryDropDown(isExpanded: Boolean) {
-        _editContactFormState.update {
-            it.copy(isCategoryDropDownExpanded = isExpanded)
-        }
-    }
-
     fun showLastContactedDatePicker(isShowing: Boolean) {
         _screenStateStream.value = _screenStateStream.value.copy(isShowingLastContactedDatePicker = isShowing)
+    }
+
+    fun showAddCategoryModal(isShowing: Boolean) {
+        _screenStateStream.value = _screenStateStream.value.copy(isShowingAddCategoryModal = isShowing)
+    }
+
+    fun updateNewCategoryName(newCategoryName: String) {
+        _screenStateStream.value = _screenStateStream.value.copy(newCategoryName = newCategoryName)
+    }
+
+    fun addCategory(categoryName: String) {
+        _screenStateStream.value.newCategoryName?.let {
+            val newCategory = ContactCategory.Custom(it)
+            if (!_screenStateStream.value.displayedCategories.contains(newCategory)) {
+                _screenStateStream.value = _screenStateStream.value.copy(
+                    displayedCategories = _screenStateStream.value.displayedCategories + newCategory
+                )
+            }
+        }
     }
 
 }
 
 data class EditContactScreenState(
     val contact: Contact,
-    val isShowingLastContactedDatePicker: Boolean,
+    val isShowingLastContactedDatePicker: Boolean = false,
+    val isShowingAddCategoryModal: Boolean = false,
     val isAddingNewContact: Boolean = false,
+    val displayedCategories: List<ContactCategory> = listOf(ContactCategory.Family, ContactCategory.Friends),
+    val newCategoryName: String? = null,
 )
 
 data class EditContactValidationState(
@@ -147,9 +157,4 @@ data class EditContactValidationState(
     val isContactMethodError: Boolean = false,
     val isNoteError: Boolean = false,
     val isLastContactedError: Boolean = false,
-)
-
-data class EditContactFormSate(
-    val isCategoryDropDownExpanded: Boolean = false,
-
 )

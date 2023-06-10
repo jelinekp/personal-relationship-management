@@ -7,4 +7,13 @@
     <string name="note">Note: %s</string>
     <string name="contactMethod">Contact method: %s</string>
     <string name="title_activity_sign_in">Sign In</string>
+    <string name="category_family">Family</string>
+    <string name="category_friends">Friends</string>
+    <string name="category_other">Other</string>
+    <string name="category_custom">Custom</string>
+    <string name="profile">Profile</string>
+    <string name="id">ID</string>
+    <string name="name">Name</string>
+    <string name="log_in">Log in</string>
+    <string name="log_out">Log out</string>
 </resources>

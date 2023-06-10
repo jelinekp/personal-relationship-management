@@ -14,17 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Prm"
         tools:targetApi="tiramisu">
-        <activity
-            android:name=".features.signin.SignInActivity"
-            android:exported="true"
-            android:label="@string/title_activity_sign_in"
-            android:theme="@style/Theme.Prm">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
         <activity
             android:name=".core.ui.MainActivity"
             android:exported="true"
@@ -39,6 +29,18 @@
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
+        </activity>
+
+        <activity
+            android:name=".features.signin.SignInActivity"
+            android:exported="true"
+            android:label="@string/title_activity_sign_in"
+            android:theme="@style/Theme.Prm">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
     </application>
 

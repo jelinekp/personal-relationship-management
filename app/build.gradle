@@ -7,6 +7,7 @@ plugins {
     id 'com.google.devtools.ksp'
     id 'com.google.gms.google-services'
     id "kotlin-parcelize"
+    id 'com.google.firebase.crashlytics'
 }
 
 android {
@@ -98,7 +99,9 @@ dependencies {
     // Import the BoM and the Database for the Firebase platform
     implementation platform('com.google.firebase:firebase-bom:32.1.0')
     implementation 'com.google.firebase:firebase-database-ktx'
+    implementation 'com.google.firebase:firebase-config-ktx'
     implementation 'com.firebaseui:firebase-ui-auth:7.2.0'
+    implementation 'com.google.firebase:firebase-crashlytics-ktx'
     implementation 'com.google.android.gms:play-services-auth:20.5.0'
 
 

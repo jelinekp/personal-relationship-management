@@ -1,5 +1,6 @@
 package cz.wz.jelinekp.prm.features.contacts.ui.list
 
+import android.content.Intent
 import android.widget.Toast
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
@@ -16,21 +17,23 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.material3.CardDefaults.cardElevation
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cz.wz.jelinekp.prm.R
 import cz.wz.jelinekp.prm.features.contacts.model.Contact
 import cz.wz.jelinekp.prm.features.contacts.ui.components.LastContactedDatePicker
-import cz.wz.jelinekp.prm.features.contacts.ui.components.PrmTopBar
+import cz.wz.jelinekp.prm.features.signin.SignInActivity
 import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDateTime
 
@@ -322,10 +325,65 @@ fun AddContactFab(
 	}
 }
 
-@Preview(showBackground = true)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DefaultPreview() {
-	ContactListScreen(
-		{}
+fun PrmTopBar(
+	topBarText: String
+) {
+	val contextForToast = LocalContext.current
+
+	var dropDownMenuExpanded by remember {
+		mutableStateOf(false)
+	}
+	TopAppBar(
+		title = {
+			Text(
+				text = topBarText,
+			)
+		},
+		actions = {
+			// options icon (vertical dots)
+			TopAppBarActionButton(imageVector = Icons.Outlined.MoreVert, description = "Options") {
+				// show the drop down menu
+				dropDownMenuExpanded = true
+			}
+
+			// drop down menu
+			DropdownMenu(
+				expanded = dropDownMenuExpanded,
+				onDismissRequest = {
+					dropDownMenuExpanded = false
+				},
+				// play around with these values
+				// to position the menu properly
+				offset = DpOffset(x = 10.dp, y = (-60).dp)
+			) {
+				// this is a column scope
+				// items are added vertically
+
+				DropdownMenuItem(
+					onClick = {
+						contextForToast.startActivity(Intent(contextForToast, SignInActivity::class.java))
+						dropDownMenuExpanded = false
+					},
+					text =
+					{
+						Text("Profile & Sync")
+					})
+			}
+		}
 	)
+}
+
+@Composable
+fun TopAppBarActionButton(
+	imageVector: ImageVector,
+	description: String,
+	onClick: () -> Unit
+) {
+	IconButton(onClick = {
+		onClick()
+	}) {
+		Icon(imageVector = imageVector, contentDescription = description)
+	}
 }

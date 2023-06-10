@@ -6,6 +6,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -13,13 +15,15 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -35,23 +39,24 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import cz.wz.jelinekp.prm.features.contacts.model.ContactCategory
 import cz.wz.jelinekp.prm.features.contacts.ui.components.LastContactedDatePicker
 import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun EditContactScreen(
     navigateUp: () -> Unit,
     viewModel: EditContactViewModel = koinViewModel()
 ) {
     val screenState by viewModel.screenStateStream.collectAsStateWithLifecycle()
-    val formState by viewModel.editContactFormSate.collectAsStateWithLifecycle()
     val validationFlow by viewModel.validationSharedFlowStream.collectAsStateWithLifecycle(
         initialValue = EditContactValidationState()
     )
@@ -123,13 +128,6 @@ fun EditContactScreen(
                     ),
                     modifier = Modifier.focusRequester(nameFocusRequester)
                 )
-                DropdownMenu(
-                    expanded = formState.isCategoryDropDownExpanded,
-                    onDismissRequest = { viewModel.showCategoryDropDown(isExpanded = false) }
-                ) {
-                    DropdownMenuItem(text = { Text(text = "Family") }, onClick = { viewModel.updateCategory()
-                    ) })
-                }
                 ContactTextField(
                     label = "Country",
                     inputText = screenState.contact.country ?: "",
@@ -211,6 +209,55 @@ fun EditContactScreen(
                             }
                         )
                     }
+                }
+
+                Text(text = "Select categories:")
+                FlowRow() {
+                    screenState.displayedCategories.forEach { category ->
+                        FilterChip(
+                            selected = screenState.contact.categories.contains(category),
+                            onClick = { viewModel.updateCategory(category) },
+                            label = {
+                                Text(text = when (category) {
+                                    is ContactCategory.Custom -> category.customName
+                                    else -> stringResource(id = category.stringResource)
+                                }
+                                    )
+                                    },
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+                    }
+                    AssistChip(
+                        onClick = {
+                            viewModel.updateNewCategoryName("")
+                            viewModel.showAddCategoryModal(true)
+                                  },
+                        label = { Text(text = "Add category") },
+                        leadingIcon = { Icon(imageVector = Icons.Default.Add, contentDescription = "Add") }
+                    )
+                }
+
+                if (screenState.isShowingAddCategoryModal) {
+                    AlertDialog(
+                        onDismissRequest = { viewModel.showAddCategoryModal(false) },
+                        title = { Text("Add category") },
+                        dismissButton = { TextButton(onClick = { viewModel.showAddCategoryModal(false) }) {
+                            Text(text = "Dismiss")
+                        } },
+                        confirmButton = { TextButton(onClick = {
+                            viewModel.addCategory("Value")
+                            viewModel.showAddCategoryModal(false)
+                        }) {
+                            Text(text = "Add")
+                        } },
+                        text = {
+                            ContactTextField(
+                                inputText = screenState.newCategoryName ?: "",
+                                onValueChange = { viewModel.updateNewCategoryName(it) },
+                                label = "Category name"
+                            )
+                        },
+                    )
                 }
             }
         }

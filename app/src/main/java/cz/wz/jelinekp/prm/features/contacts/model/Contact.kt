@@ -9,7 +9,7 @@ data class Contact (
 
 	val id: Long = 0,
 	val name: String,
-	val category: List<Categories>,
+	val categories: List<ContactCategory>,
 	val lastContacted: LocalDateTime = LocalDateTime.now(),
 	val country: String?,
 	val contactMethod: String?,
@@ -21,13 +21,13 @@ data class Contact (
 		get() = lastContacted.format(DateTimeFormatter.ofPattern("d. L. yyyy"))
 
 	companion object {
-		val emptyContact = Contact(id = 0, name = "", category = listOf(Categories.Other), country = "", contactMethod = "", note = "")
+		val emptyContact = Contact(id = 0, name = "", categories = listOf(ContactCategory.Other), country = "", contactMethod = "", note = "")
 	}
 
 	fun toDbContact() = DbContact(
 		id = id,
 		name = name,
-		category = category,
+		category = categories,
 		lastContacted = lastContacted,
 		country = country,
 		contactMethod = contactMethod,
@@ -38,7 +38,7 @@ data class Contact (
     fun toFirebaseContact() = FirebaseContact(
 		id = id,
 		name = name,
-		category = category,
+		categories = categories,
 		lastContacted = lastContacted,
 		country = country,
 		contactMethod = contactMethod,

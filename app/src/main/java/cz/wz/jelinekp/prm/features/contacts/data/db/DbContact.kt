@@ -5,21 +5,11 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import cz.wz.jelinekp.prm.features.contacts.data.firebase.FirebaseContact
-import cz.wz.jelinekp.prm.features.contacts.model.Categories
 import cz.wz.jelinekp.prm.features.contacts.model.Contact
+import cz.wz.jelinekp.prm.features.contacts.model.ContactCategory
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 import java.time.LocalDateTime
-
-val String.toCategory: Categories
-    get() {
-        return when (this) {
-            "family" -> Categories.Family
-            "friends" -> Categories.Friends
-            "other" -> Categories.Other
-            else -> Categories.Custom(this)
-        }
-    }
 
 @Entity(tableName = "contact")
 @Parcelize
@@ -30,7 +20,7 @@ data class DbContact (
 
     val name: String,
 
-    val category: @RawValue List<Categories> = listOf(Categories.Other),
+    val category: @RawValue List<ContactCategory> = listOf(ContactCategory.Other),
 
     @ColumnInfo(name = "last_contacted")
     val lastContacted: LocalDateTime = LocalDateTime.now(),
@@ -49,7 +39,7 @@ data class DbContact (
     fun toContact() = Contact(
         id = id,
         name = name,
-        category = category,
+        categories = category,
         lastContacted = lastContacted,
         country = country,
         contactMethod = contactMethod,
@@ -59,7 +49,7 @@ data class DbContact (
     fun toFirebaseContact() = FirebaseContact(
         id = id,
         name = name,
-        category = category,
+        categories = category,
         lastContacted = lastContacted,
         country = country,
         contactMethod = contactMethod,
