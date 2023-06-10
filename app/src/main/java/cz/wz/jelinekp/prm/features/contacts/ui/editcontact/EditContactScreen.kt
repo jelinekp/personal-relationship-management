@@ -44,6 +44,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import cz.wz.jelinekp.prm.R
 import cz.wz.jelinekp.prm.features.contacts.model.ContactCategory
 import cz.wz.jelinekp.prm.features.contacts.ui.components.LastContactedDatePicker
 import org.koin.androidx.compose.koinViewModel
@@ -70,26 +71,37 @@ fun EditContactScreen(
     val context = LocalContext.current
 
     if (validationFlow.isLastContactedError)
-        Toast.makeText(context, "Last contacted date can't be in the future", Toast.LENGTH_SHORT)
+        Toast.makeText(
+            context,
+            stringResource(R.string.last_contacted_date_can_t_be_in_the_future),
+            Toast.LENGTH_SHORT
+        )
             .show()
     else if (validationFlow.isNameError)
-        Toast.makeText(context, "Name field can't be empty", Toast.LENGTH_SHORT).show()
+        Toast.makeText(
+            context,
+            stringResource(R.string.name_field_can_t_be_empty),
+            Toast.LENGTH_SHORT
+        ).show()
     else if (validationFlow.isCategoryError)
-        Toast.makeText(context, "Wrong category", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, stringResource(R.string.wrong_category), Toast.LENGTH_SHORT).show()
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        text = if (screenState.isAddingNewContact) "Add Contact" else "Edit contact",
+                        text = stringResource(
+                            if (screenState.isAddingNewContact) R.string.add_contact else
+                                R.string.edit_contact_screen_name
+                        )
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = navigateUp) {
                         Icon(
                             Icons.Default.Clear,
-                            contentDescription = "Back icon"
+                            contentDescription = stringResource(R.string.back_icon)
                         )
                     }
                 },
@@ -102,7 +114,7 @@ fun EditContactScreen(
                             }
                         },
                     ) {
-                        Text("Save")
+                        Text(stringResource(R.string.save))
                     }
                 },
             )
@@ -117,7 +129,7 @@ fun EditContactScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 ContactTextField(
-                    label = "Name",
+                    label = stringResource(id = R.string.name),
                     inputText = screenState.contact.name,
                     onValueChange = { text -> viewModel.updateName(name = text) },
                     isError = validationFlow.isNameError,
@@ -129,7 +141,7 @@ fun EditContactScreen(
                     modifier = Modifier.focusRequester(nameFocusRequester)
                 )
                 ContactTextField(
-                    label = "Country",
+                    label = stringResource(id = R.string.country),
                     inputText = screenState.contact.country ?: "",
                     onValueChange = { text -> viewModel.updateCountry(country = text) },
                     isError = validationFlow.isCountryError,
@@ -141,7 +153,7 @@ fun EditContactScreen(
                     modifier = Modifier.focusRequester(countryFocusRequester)
                 )
                 ContactTextField(
-                    label = "Contact method",
+                    label = stringResource(R.string.contact_method),
                     inputText = screenState.contact.contactMethod ?: "",
                     onValueChange = { text -> viewModel.updateContactMethod(contactMethod = text) },
                     isError = validationFlow.isContactMethodError,
@@ -153,7 +165,7 @@ fun EditContactScreen(
                     modifier = Modifier.focusRequester(contactMethodFocusRequester)
                 )
                 ContactTextField(
-                    label = "Note",
+                    label = stringResource(id = R.string.note),
                     inputText = screenState.contact.note ?: "",
                     onValueChange = { text -> viewModel.updateNote(note = text) },
                     singleLine = false,
@@ -170,11 +182,13 @@ fun EditContactScreen(
                 )
 
                 ReadonlyTextField(
-                    value = screenState.contact.lastContacted.format(DateTimeFormatter.ofPattern("d. L. yyyy"))
+                    value = screenState.contact.lastContacted.format(DateTimeFormatter.ofPattern(
+                                            stringResource(R.string.date_format_to_display)
+                                        ))
                         .toString(),
                     onValueChange = {},
                     onClick = { viewModel.showLastContactedDatePicker(isShowing = true) },
-                    label = "Last contacted date",
+                    label = stringResource(R.string.last_contacted_date),
                     isError = validationFlow.isLastContactedError,
                     modifier = Modifier.focusRequester(lastContactedFocusRequester),
                 )
@@ -188,7 +202,7 @@ fun EditContactScreen(
                         },
                         confirmButton = {
                             TextButton(onClick = { viewModel.showLastContactedDatePicker(isShowing = false) }) {
-                                Text(text = "OK")
+                                Text(text = stringResource(id = R.string.ok))
                             }
                         },
                         dismissButton = {
@@ -196,7 +210,7 @@ fun EditContactScreen(
                                 viewModel.updateLastContacted(LocalDateTime.now())
                                 viewModel.showLastContactedDatePicker(isShowing = false)
                             }) {
-                                Text(text = "Cancel")
+                                Text(text = stringResource(id = R.string.cancel))
                             }
                         }
                     ) {
@@ -211,19 +225,20 @@ fun EditContactScreen(
                     }
                 }
 
-                Text(text = "Select categories:")
+                Text(text = stringResource(R.string.select_categories))
                 FlowRow() {
                     screenState.displayedCategories.forEach { category ->
                         FilterChip(
                             selected = screenState.contact.categories.contains(category),
                             onClick = { viewModel.updateCategory(category) },
                             label = {
-                                Text(text = when (category) {
-                                    is ContactCategory.Custom -> category.customName
-                                    else -> stringResource(id = category.stringResource)
-                                }
-                                    )
-                                    },
+                                Text(
+                                    text = when (category) {
+                                        is ContactCategory.Custom -> category.customName
+                                        else -> stringResource(id = category.stringResource)
+                                    }
+                                )
+                            },
                             modifier = Modifier.padding(end = 8.dp)
                         )
                     }
@@ -231,30 +246,39 @@ fun EditContactScreen(
                         onClick = {
                             viewModel.updateNewCategoryName("")
                             viewModel.showAddCategoryModal(true)
-                                  },
-                        label = { Text(text = "Add category") },
-                        leadingIcon = { Icon(imageVector = Icons.Default.Add, contentDescription = "Add") }
+                        },
+                        label = { Text(text = stringResource(R.string.add_category)) },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = stringResource(R.string.add)
+                            )
+                        }
                     )
                 }
 
                 if (screenState.isShowingAddCategoryModal) {
                     AlertDialog(
                         onDismissRequest = { viewModel.showAddCategoryModal(false) },
-                        title = { Text("Add category") },
-                        dismissButton = { TextButton(onClick = { viewModel.showAddCategoryModal(false) }) {
-                            Text(text = "Dismiss")
-                        } },
-                        confirmButton = { TextButton(onClick = {
-                            viewModel.addCategory("Value")
-                            viewModel.showAddCategoryModal(false)
-                        }) {
-                            Text(text = "Add")
-                        } },
+                        title = { Text(stringResource(id = R.string.add_category)) },
+                        dismissButton = {
+                            TextButton(onClick = { viewModel.showAddCategoryModal(false) }) {
+                                Text(text = stringResource(R.string.dismiss))
+                            }
+                        },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                viewModel.addCategory()
+                                viewModel.showAddCategoryModal(false)
+                            }) {
+                                Text(text = stringResource(id = R.string.add))
+                            }
+                        },
                         text = {
                             ContactTextField(
                                 inputText = screenState.newCategoryName ?: "",
                                 onValueChange = { viewModel.updateNewCategoryName(it) },
-                                label = "Category name"
+                                label = stringResource(R.string.category_name)
                             )
                         },
                     )
@@ -306,7 +330,7 @@ fun ReadonlyTextField(
             onValueChange = onValueChange,
             isError = isError,
             modifier = modifier,
-            trailingIcon = { Icon(Icons.Default.ArrowDropDown, contentDescription = "Dropdown") },
+            trailingIcon = { Icon(Icons.Default.ArrowDropDown, contentDescription = stringResource(R.string.dropdown)) },
         )
         Box(
             modifier = Modifier

@@ -1,5 +1,6 @@
 package cz.wz.jelinekp.prm.features.contacts.ui.list
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cz.wz.jelinekp.prm.features.contacts.data.ContactRepository
@@ -23,7 +24,13 @@ class ContactListViewModel(
 	/*private val _expandedContactsScreenState = MutableStateFlow(ExpandedContactsScreenState())*/
 
 	init {
+		viewModelScope.launch {
+			repository.syncContactsFromFirebase()
+			Log.d("Firebase sync", "success")
+		}
+
 	    viewModelScope.launch {
+
 			repository.getAllContactsFromRoom().collectLatest {
 				_screenStateStream.value = ContactListScreenState.Loaded(it)
 			}

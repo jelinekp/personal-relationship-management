@@ -22,7 +22,7 @@ interface ContactDao {
 	suspend fun insert(contacts: List<DbContact>)
 
 	@Insert(onConflict = OnConflictStrategy.REPLACE)
-	suspend fun insertContact(contact: DbContact)
+	suspend fun insertContact(contact: DbContact) : Long
 
 	@Update
 	suspend fun updateContact(contact: DbContact)

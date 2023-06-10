@@ -14,7 +14,7 @@ class ContactRoomDataSource(private val contactDao: ContactDao) : ContactLocalDa
 
     override fun getContact(id: Long): Flow<Contact?> = contactDao.getContact(id).map { it?.toContact() }
 
-    override suspend fun insertContact(contact: Contact) = contactDao.insertContact(contact.toDbContact())
+    override suspend fun insertContact(contact: Contact): Long = contactDao.insertContact(contact.toDbContact())
 
     override suspend fun updateContact(contact: Contact) = contactDao.updateContact(contact.toDbContact())
     override suspend fun updateLastContacted(contactId: Long, lastContacted: LocalDateTime, modified: LocalDateTime)

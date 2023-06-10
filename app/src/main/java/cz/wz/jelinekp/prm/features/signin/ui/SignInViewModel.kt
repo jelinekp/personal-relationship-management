@@ -21,14 +21,15 @@ class SignInViewModel(
         userRepository.userStream
             .onEach { user ->
                 _screenStateStream.update { state ->
-                    state.copy(id = user?.id, name = user?.name)
+                    val isSignedIn = user?.id != null
+                    state.copy(id = user?.id, name = user?.name, isSignedIn = isSignedIn)
                 }
             }
             .launchIn(viewModelScope)
     }
 
     fun signIn(activity: Activity) {
-        userRepository.signIn(activity)
+        userRepository.signInWithGoogle(activity)
     }
 
     fun signOut() {
@@ -39,4 +40,5 @@ class SignInViewModel(
 data class ProfileScreenState(
     val id: String? = null,
     val name: String? = null,
+    val isSignedIn: Boolean = false,
 )

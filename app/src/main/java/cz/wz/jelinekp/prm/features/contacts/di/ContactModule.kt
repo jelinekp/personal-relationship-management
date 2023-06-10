@@ -1,6 +1,5 @@
 package cz.wz.jelinekp.prm.features.contacts.di
 
-import com.google.firebase.database.FirebaseDatabase
 import cz.wz.jelinekp.prm.core.data.db.ContactDb
 import cz.wz.jelinekp.prm.features.contacts.data.ContactLocalDataSource
 import cz.wz.jelinekp.prm.features.contacts.data.ContactRepository
@@ -19,8 +18,10 @@ val contactModule get() = module {
 
     // This should be in the coreModule
     // single { get<FirebaseInstance>().getInstance() }
-    factory<FirebaseDataStore> { FirebaseDataStore(firebaseDatabase = FirebaseDatabase.getInstance()) }
+    // factory<FirebaseDataStore> { FirebaseDataStore(get(), get(), get()) }
 
+
+    factoryOf(::FirebaseDataStore)
     factoryOf(::ContactRepository)
 
     viewModelOf(::ContactListViewModel)

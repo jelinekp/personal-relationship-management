@@ -10,7 +10,7 @@ interface ContactLocalDataSource {
 
     fun getContact(id: Long): Flow<Contact?>
 
-    suspend fun insertContact(contact: Contact)
+    suspend fun insertContact(contact: Contact) : Long
 
     suspend fun updateContact(contact: Contact)
 

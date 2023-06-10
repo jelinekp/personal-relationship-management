@@ -1,5 +1,6 @@
 package cz.wz.jelinekp.prm.features.contacts.data
 
+import android.util.Log
 import cz.wz.jelinekp.prm.features.contacts.data.firebase.FirebaseDataStore
 import cz.wz.jelinekp.prm.features.contacts.model.Contact
 import kotlinx.coroutines.flow.Flow
@@ -11,9 +12,18 @@ class ContactRepository(
 ) {
 	fun getAllContactsFromRoom(): Flow<List<Contact>> = contactLocalDataSource.getAllContacts()
 	
-	suspend fun addContactToRoom(contact: Contact) {
-		contactLocalDataSource.insertContact(contact)
-		firebaseDataStore.setValue(contact)
+	suspend fun addContact(contact: Contact) {
+		val id = contactLocalDataSource.insertContact(contact)
+		firebaseDataStore.addContact(contact.copy(id = id))
+	}
+
+	suspend fun syncContactsToFirebase() {
+		firebaseDataStore.syncToDatabase(contactLocalDataSource.getAllContacts())
+	}
+
+	suspend fun syncContactsFromFirebase() {
+		Log.d(TAG, "calling firebase fetch")
+		contactLocalDataSource.insert(firebaseDataStore.syncFromFirebase())
 	}
 
 	suspend fun updateContactLastContacted(contactId: Long, lastContacted: LocalDateTime)
@@ -22,4 +32,8 @@ class ContactRepository(
 	suspend fun deleteContact(contactId: Long) = contactLocalDataSource.deleteContact(contactId)
     fun getContactById(contactId: Long) = contactLocalDataSource.getContact(contactId)
 	suspend fun updateContact(contact: Contact) = contactLocalDataSource.updateContact(contact)
+
+	companion object {
+		private const val TAG = "Contact Repository"
+	}
 }

@@ -69,7 +69,7 @@ class EditContactViewModel(
 
         if (validateInputs()) {
             if (_screenStateStream.value.isAddingNewContact)
-                viewModelScope.launch { contactRepository.addContactToRoom(screenStateStream.value.contact) }
+                viewModelScope.launch { contactRepository.addContact(screenStateStream.value.contact) }
             else
                 viewModelScope.launch { contactRepository.updateContact(screenStateStream.value.contact) }
             return true
@@ -128,7 +128,7 @@ class EditContactViewModel(
         _screenStateStream.value = _screenStateStream.value.copy(newCategoryName = newCategoryName)
     }
 
-    fun addCategory(categoryName: String) {
+    fun addCategory() {
         _screenStateStream.value.newCategoryName?.let {
             val newCategory = ContactCategory.Custom(it)
             if (!_screenStateStream.value.displayedCategories.contains(newCategory)) {

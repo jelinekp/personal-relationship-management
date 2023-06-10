@@ -2,6 +2,7 @@ package cz.wz.jelinekp.prm.features.signin.data
 
 import android.app.Activity
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
@@ -34,9 +35,18 @@ class UserRepository(
         }
     }
 
-    fun signIn(activity: Activity) {
+    fun signInWithGoogle(activity: Activity) {
         val scopes = listOf("email", "profile")
         val provider = OAuthProvider.newBuilder(GoogleAuthProvider.PROVIDER_ID, auth)
+            .setScopes(scopes)
+            .build()
+
+        auth.startActivityForSignInWithProvider(activity, provider)
+    }
+
+    fun signInWithEmail(activity: Activity) {
+        val scopes = listOf("email", "profile")
+        val provider = OAuthProvider.newBuilder(EmailAuthProvider.PROVIDER_ID, auth)
             .setScopes(scopes)
             .build()
 
