@@ -282,19 +282,19 @@ fun MoreContactInfo(
     Column() {
         if (contact.country != null) {
             Text(
-                text = stringResource(id = R.string.country, contact.country),
+                text = stringResource(id = R.string.country_colon_value, contact.country),
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
         if (contact.contactMethod != null) {
             Text(
-                text = stringResource(id = R.string.contactMethod, contact.contactMethod),
+                text = stringResource(id = R.string.contactMethod_colon_value, contact.contactMethod),
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
         if (contact.note != null) {
             Text(
-                text = stringResource(id = R.string.note, contact.note),
+                text = stringResource(id = R.string.note_colon_value, contact.note),
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
@@ -322,12 +322,13 @@ fun ContactCardButton(
 fun AddContactFab(
     onClick: () -> Unit
 ) {
-    FloatingActionButton(
+    ExtendedFloatingActionButton(
         onClick = onClick,
         containerColor = MaterialTheme.colorScheme.primary,
         contentColor = MaterialTheme.colorScheme.onPrimary
     ) {
-        Icon(Icons.Default.Add, "", Modifier.size(32.dp))
+        Icon(Icons.Default.Add, null, Modifier.size(30.dp))
+        Text(text = "Add contact", modifier = Modifier.padding(start = 4.dp))
     }
 }
 

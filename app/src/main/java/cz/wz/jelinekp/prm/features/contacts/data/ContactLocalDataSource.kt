@@ -16,7 +16,7 @@ interface ContactLocalDataSource {
 
     suspend fun updateLastContacted(contactId: Long, lastContacted: LocalDateTime, modified: LocalDateTime = LocalDateTime.now())
 
-    suspend fun insert(contacts: List<Contact>)
+    suspend fun insert(contacts: List<Contact>): List<Long>
 
     suspend fun deleteContact(contactId: Long)
 

@@ -19,7 +19,7 @@ interface ContactDao {
 	fun getContact(id: Long): Flow<DbContact?>
 
 	@Insert(onConflict = OnConflictStrategy.REPLACE)
-	suspend fun insert(contacts: List<DbContact>)
+	suspend fun insert(contacts: List<DbContact>) : List<Long>
 
 	@Insert(onConflict = OnConflictStrategy.REPLACE)
 	suspend fun insertContact(contact: DbContact) : Long

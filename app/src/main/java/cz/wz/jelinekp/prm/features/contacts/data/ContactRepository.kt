@@ -21,9 +21,12 @@ class ContactRepository(
 		firebaseDataStore.syncToDatabase(contactLocalDataSource.getAllContacts())
 	}
 
-	suspend fun syncContactsFromFirebase() {
+	suspend fun syncContactsFromFirebase(): Boolean {
 		Log.d(TAG, "calling firebase fetch")
-		contactLocalDataSource.insert(firebaseDataStore.syncFromFirebase())
+		val addedIds = contactLocalDataSource.insert(firebaseDataStore.syncFromFirebase())
+		if (addedIds.isNotEmpty())
+			return true
+		return false
 	}
 
 	suspend fun updateContactLastContacted(contactId: Long, lastContacted: LocalDateTime)
@@ -34,6 +37,6 @@ class ContactRepository(
 	suspend fun updateContact(contact: Contact) = contactLocalDataSource.updateContact(contact)
 
 	companion object {
-		private const val TAG = "Contact Repository"
+		private const val TAG = "ContactRepository"
 	}
 }

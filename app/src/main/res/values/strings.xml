@@ -3,9 +3,9 @@
     <string name="who_to_contact">Who to contact</string>
     <string name="contacted_today">Contacted today</string>
     <string name="set_contacted_date">Set contacted date</string>
-    <string name="country">Country:</string>
-    <string name="note">Note:</string>
-    <string name="contactMethod">Contact method:</string>
+    <string name="country">Country</string>
+    <string name="note">Note</string>
+    <string name="contactMethod">Contact method</string>
     <string name="title_activity_sign_in">Sign In</string>
     <string name="category_family">Family</string>
     <string name="category_friends">Friends</string>
@@ -41,4 +41,7 @@
     <string name="category_name">Category name</string>
     <string name="dropdown">Dropdown</string>
     <string name="log_in_with_google">Log in with Google</string>
+    <string name="country_colon_value">Country: %s</string>
+    <string name="contactMethod_colon_value">Contact method: %s</string>
+    <string name="note_colon_value">Note: %s</string>
 </resources>

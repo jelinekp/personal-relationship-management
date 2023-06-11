@@ -13,7 +13,8 @@ data class Contact (
 	val lastContacted: LocalDateTime = LocalDateTime.now(),
 	val country: String?,
 	val contactMethod: String?,
-	val note: String?
+	val note: String?,
+	val modified: LocalDateTime = LocalDateTime.now(),
 
 ) {
 
