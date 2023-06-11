@@ -25,9 +25,9 @@ class ContactListViewModel(
 
 	init {
 		viewModelScope.launch {
-			if (repository.syncContactsFromFirebase()) {
+			/*if (repository.syncContactsFromFirebase()) {
 				Log.d("FirebaseDataStore", "Contact synced from firebase")
-			}
+			}*/
 			repository.getAllContactsFromRoom().collectLatest {
 				_screenStateStream.value = ContactListScreenState.Loaded(it)
 			}

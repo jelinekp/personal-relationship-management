@@ -10,6 +10,7 @@ import cz.wz.jelinekp.prm.features.contacts.model.ContactCategory
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 @Entity(tableName = "contact")
 @Parcelize
@@ -44,16 +45,17 @@ data class DbContact (
         country = country,
         contactMethod = contactMethod,
         note = note,
+        modified = modified,
     )
 
     fun toFirebaseContact() = FirebaseContact(
         id = id,
         name = name,
         categories = category,
-        lastContacted = lastContacted,
+        lastContacted = lastContacted.toEpochSecond(ZoneOffset.UTC),
         country = country,
         contactMethod = contactMethod,
         note = note,
-        modified = modified,
+        modified = modified.toEpochSecond(ZoneOffset.UTC),
     )
 }

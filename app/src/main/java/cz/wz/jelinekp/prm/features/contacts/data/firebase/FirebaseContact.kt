@@ -23,17 +23,18 @@ data class FirebaseContact(
         lastContacted = LocalDateTime.ofEpochSecond(lastContacted, 0, ZoneOffset.UTC),
         country = country,
         contactMethod = contactMethod,
-        note = note
+        note = note,
+        modified = LocalDateTime.ofEpochSecond(modified, 0, ZoneOffset.UTC),
     )
 
     fun toDbContact() = DbContact(
         id = id,
         name = name,
         category = categories,
-        lastContacted = lastContacted,
+        lastContacted = LocalDateTime.ofEpochSecond(lastContacted, 0, ZoneOffset.UTC),
         country = country,
         contactMethod = contactMethod,
         note = note,
-        modified = modified,
+        modified = LocalDateTime.ofEpochSecond(modified, 0, ZoneOffset.UTC),
     )
 }

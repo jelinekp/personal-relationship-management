@@ -3,6 +3,7 @@ package cz.wz.jelinekp.prm.features.contacts.model
 import cz.wz.jelinekp.prm.features.contacts.data.db.DbContact
 import cz.wz.jelinekp.prm.features.contacts.data.firebase.FirebaseContact
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 data class Contact (
@@ -40,11 +41,11 @@ data class Contact (
 		id = id,
 		name = name,
 		categories = categories,
-		lastContacted = lastContacted,
+		lastContacted = lastContacted.toEpochSecond(ZoneOffset.UTC),
 		country = country,
 		contactMethod = contactMethod,
 		note = note,
-		modified = LocalDateTime.now()
+		modified = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC),
 	)
 
 }
