@@ -9,10 +9,15 @@ sealed class ContactCategory(
 ) {
     object Family : ContactCategory("family", CategoryTypes.PRESET, R.string.category_family)
     object Friends : ContactCategory("friends", CategoryTypes.PRESET, R.string.category_friends)
+    object Professional: ContactCategory("professional", CategoryTypes.PRESET, R.string.professional)
     object Other : ContactCategory("other", CategoryTypes.PRESET, R.string.category_other)
     data class Custom(val customName: String) : ContactCategory("custom", CategoryTypes.CUSTOM, R.string.category_custom) {
         fun equals(other: ContactCategory.Custom): Boolean {
             return this.customName == other.customName
+        }
+
+        override fun toString(): String {
+            return customName
         }
     }
 

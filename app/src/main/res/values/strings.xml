@@ -44,4 +44,7 @@
     <string name="country_colon_value">Country: %s</string>
     <string name="contactMethod_colon_value">Contact method: %s</string>
     <string name="note_colon_value">Note: %s</string>
+    <string name="professional">Professional</string>
+    <string name="backup_data_online">Backup data online</string>
+    <string name="download_online_data">Download online stored data</string>
 </resources>

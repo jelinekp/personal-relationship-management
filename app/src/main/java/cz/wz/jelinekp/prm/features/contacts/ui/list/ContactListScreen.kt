@@ -7,11 +7,11 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
@@ -122,30 +122,6 @@ fun LoadedState(
     onLastContactedEditClick: (contactId: Long) -> Unit,
     onEditContactClick: (contactId: Long) -> Unit,
 ) {
-    Column(
-        modifier = Modifier
-            .background(
-                MaterialTheme.colorScheme.background
-            )
-            .padding(horizontal = 16.dp)
-            .fillMaxSize()
-            .verticalScroll(state = ScrollState(0)),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        //contentPadding = PaddingValues(bottom = 192.dp, top = 8.dp)
-    ) {
-        Spacer(modifier = Modifier.height(8.dp))
-        contacts.forEach { contact ->
-            ContactItem(
-                contact = contact,
-                onContactedTodayClick = onContactedTodayClick,
-                onDeleteContact = onDeleteContact,
-                onLastContactedEditClick = onLastContactedEditClick,
-                onEditContactClick = onEditContactClick,
-            )
-        }
-        Spacer(modifier = Modifier.height(192.dp))
-    }
-    /* The LazyColumn is just slow as fuck and even forgets the state on each scroll
     LazyColumn(
         modifier = Modifier
             .background(
@@ -165,11 +141,11 @@ fun LoadedState(
                 onEditContactClick = onEditContactClick,
             )
         }
-    }*/
+    }
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ContactItem(
     contact: Contact,
@@ -206,7 +182,7 @@ fun ContactItem(
             )
             .fillMaxWidth(),
         elevation = cardElevation(4.dp),
-        //onClick = { expanded = !expanded },
+        //onClick = { expanded = !expanded }, // moved to "combinedClickable()
     ) {
         Row(
             modifier = Modifier
@@ -239,9 +215,6 @@ fun ContactItem(
                     IconButton(onClick = { onLastContactedEditClick(contact.id) }) {
                         Icon(Icons.Default.DateRange, contentDescription = stringResource(R.string.set_last_contacted))
                     }
-                    /*IconButton(onClick = { onContactedTodayClick(contact.id) }) {
-                        Icon(Icons.Default.Done, contentDescription = "")
-                    }*/
                 }
                 if (expanded) {
                     Row(
@@ -302,23 +275,6 @@ fun MoreContactInfo(
 }
 
 @Composable
-fun ContactCardButton(
-    onClick: () -> Unit,
-    text: String,
-    modifier: Modifier = Modifier
-) {
-    Button(
-        onClick = onClick,
-        modifier = modifier
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodySmall
-        )
-    }
-}
-
-@Composable
 fun AddContactFab(
     onClick: () -> Unit
 ) {
@@ -362,7 +318,6 @@ fun PrmTopBar(
                 },
                 offset = DpOffset(x = 10.dp, y = (-50).dp)
             ) {
-
                 DropdownMenuItem(
                     onClick = {
                         contextForToast.startActivity(

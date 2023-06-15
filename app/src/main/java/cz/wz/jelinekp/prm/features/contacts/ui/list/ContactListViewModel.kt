@@ -1,6 +1,5 @@
 package cz.wz.jelinekp.prm.features.contacts.ui.list
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cz.wz.jelinekp.prm.features.contacts.data.ContactRepository
@@ -21,13 +20,11 @@ class ContactListViewModel(
 	private val _datePickerScreenStateStream = MutableStateFlow(DatePickerScreenState(showLastContactedDatePicker = null))
 	val datePickerScreenStateStream get() = _datePickerScreenStateStream.asStateFlow()
 
-	/*private val _expandedContactsScreenState = MutableStateFlow(ExpandedContactsScreenState())*/
+//	private val _expandedContactsScreenState = MutableStateFlow(ExpandedContactsScreenState())
 
 	init {
+//		viewModelScope.launch { repository.syncContactsFromFirebase() }
 		viewModelScope.launch {
-			if (repository.syncContactsFromFirebase()) {
-				Log.d("FirebaseDataStore", "Contact synced from firebase")
-			}
 			repository.getAllContactsFromRoom().collectLatest {
 				_screenStateStream.value = ContactListScreenState.Loaded(it)
 			}
