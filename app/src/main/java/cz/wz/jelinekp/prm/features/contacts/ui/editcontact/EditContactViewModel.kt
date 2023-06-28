@@ -72,6 +72,8 @@ class EditContactViewModel(
                 viewModelScope.launch { contactRepository.addContact(screenStateStream.value.contact) }
             else
                 viewModelScope.launch { contactRepository.updateContact(screenStateStream.value.contact) }
+
+            //viewModelScope.launch { contactRepository.syncContactsToFirebase() }
             return true
         }
         return false

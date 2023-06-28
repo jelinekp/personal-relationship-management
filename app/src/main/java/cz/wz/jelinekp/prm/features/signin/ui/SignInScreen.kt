@@ -1,6 +1,7 @@
 package cz.wz.jelinekp.prm.features.signin.ui
 
 import android.app.Activity
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -58,9 +59,9 @@ fun SignInScreen(
             Text(
                 text = if (state.id != null) "Logged in as ${state.name}" else "Not logged in",
                 modifier = Modifier
-                    .weight(1f)
                     .align(Alignment.CenterHorizontally)
             )
+            Spacer(modifier = Modifier.weight(1f))
             if (state.isSignedIn) {
                 Button(
                     onClick = { viewModel.signOut() },
@@ -68,6 +69,22 @@ fun SignInScreen(
                         .align(Alignment.CenterHorizontally),
                 ) {
                     Text(stringResource(id = R.string.log_out))
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                Button(
+                    onClick = { viewModel.syncToFirebase() },
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally),
+                ) {
+                    Text(stringResource(id = R.string.backup_data_online))
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                Button(
+                    onClick = { viewModel.syncFromFirebase() },
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally),
+                ) {
+                    Text(stringResource(id = R.string.download_online_data))
                 }
             } else {
                 Button(
@@ -83,4 +100,17 @@ fun SignInScreen(
             Spacer(modifier = Modifier.weight(3f))
         }
     }
+
+    if (state.isSyncFromFirebaseSuccess)
+        SuccessMessage(text = "Data successfully synced from Firebase")
+    if (state.isSyncToFirebaseSuccess)
+        SuccessMessage(text = "Data successfully synced to Firebase")
+}
+
+@Composable
+fun SuccessMessage(
+    text: String
+) {
+    val context = LocalContext.current
+    Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
 }

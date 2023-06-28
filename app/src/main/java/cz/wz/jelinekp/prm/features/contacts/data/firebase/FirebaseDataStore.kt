@@ -6,9 +6,10 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.database.FirebaseDatabase
 import cz.wz.jelinekp.prm.features.contacts.model.Contact
 import cz.wz.jelinekp.prm.features.signin.data.UserRepository
+import cz.wz.jelinekp.prm.features.signin.model.User
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.tasks.await
 
@@ -28,28 +29,29 @@ class FirebaseDataStore(
         ))
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    suspend fun syncFromFirebase() : List<Contact> {
-        var firebaseContacts = emptyList<Contact>()
-        userRepository.userStream.collectLatest { user ->
-            Log.d(TAG, "---------------------- user ${user?.name}")
-            Log.d(TAG, "Firebase path: $USERS_NODE/${user?.id}/$CONTACTS_NODE")
-            if (user != null) {
-                val contactReference = firebaseDatabase.getReference("$USERS_NODE/${user.id}/$CONTACTS_NODE")
-                val firebaseContactList = contactReference.get().await().children.map { snapshot ->
-                    snapshot.getValue(FirebaseContact::class.java)!!.toContact()
-                }
-                Log.d(TAG, "Syncing from FIREBASE $firebaseContactList")
-                firebaseContacts = firebaseContactList
-            }
-        }
-        return firebaseContacts
+    private fun filteredUserFlow() : Flow<User?> = userRepository.userStream.filter {
+        it != null
     }
 
-    suspend fun syncToDatabase(allContacts: Flow<List<Contact>>) {
-        val user = userRepository.userStream.first() ?: return
+    @OptIn(ExperimentalCoroutinesApi::class)
+    suspend fun syncFromFirebase() : List<Contact> {
+        val user = filteredUserFlow().first()!!
+        Log.d(TAG, "---------------------- user ${user.name}")
+        Log.d(TAG, "Firebase path: $USERS_NODE/${user.id}/$CONTACTS_NODE")
+        val contactReference = firebaseDatabase.getReference("$USERS_NODE/${user.id}/$CONTACTS_NODE")
+        val firebaseContactList = contactReference.get().await().children.map { snapshot ->
+            snapshot.getValue(FirebaseContact::class.java)!!.toContact()
+        }
+        Log.d(TAG, "Syncing from FIREBASE $firebaseContactList")
+        return firebaseContactList
+    }
+
+    suspend fun syncToFirebase(contacts: List<Contact>) : Boolean {
+        val user = userRepository.userStream.first() ?: return false
         val contactsReference = firebaseDatabase.getReference("$USERS_NODE/${user.id}/$CONTACTS_NODE")
-        contactsReference.setValue(allContacts.first())
+        Log.d(TAG, "Uploading to Firebase: ${contacts.map { it.toFirebaseContact() }}")
+        contactsReference.setValue(contacts.map { it.toFirebaseContact() })
+        return true
     }
 
     companion object {

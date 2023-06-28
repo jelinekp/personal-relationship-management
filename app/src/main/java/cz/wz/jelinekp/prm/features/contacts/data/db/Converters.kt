@@ -11,9 +11,24 @@ val String.toCategory: ContactCategory
         return when (this) {
             "family" -> ContactCategory.Family
             "friends" -> ContactCategory.Friends
-            "other" -> ContactCategory.Other
+            "professional" -> ContactCategory.Professional
+            "other", "", " " -> ContactCategory.Other
             else -> ContactCategory.Custom(this)
         }
+    }
+
+val String.toCategories: List<ContactCategory>
+    get() {
+        if (this.isEmpty())
+            return listOf(ContactCategory.Other)
+        return this.split(";").map { it.toCategory }
+    }
+
+val List<ContactCategory>.toString: String
+    get() {
+        if (this.isEmpty())
+            return "other"
+        return this.joinToString(separator = ";") { it.toString() }
     }
 
 class Converters {
@@ -37,7 +52,7 @@ class Converters {
     }
 
     @TypeConverter
-    fun toStringList(string: String?): List<ContactCategory> {
+    fun stringToCategories(string: String?): List<ContactCategory> {
         return string?.split(";")?.map { it.toCategory } ?: listOf(ContactCategory.Other)
     }
 

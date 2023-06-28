@@ -51,7 +51,7 @@ data class DbContact (
     fun toFirebaseContact() = FirebaseContact(
         id = id,
         name = name,
-        categories = category,
+        categories = category.toString(),
         lastContacted = lastContacted.toEpochSecond(ZoneOffset.UTC),
         country = country,
         contactMethod = contactMethod,
