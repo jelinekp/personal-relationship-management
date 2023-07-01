@@ -2,11 +2,8 @@ package cz.wz.jelinekp.prm.features.categories.data.db
 
 import cz.wz.jelinekp.prm.features.categories.data.CategoryLocalDataSource
 import cz.wz.jelinekp.prm.features.categories.model.Category
-import cz.wz.jelinekp.prm.features.contacts.data.db.ContactDao
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.transform
 
 class CategoryRoomDataSource(
 	private val categoryDao: CategoryDao
@@ -35,5 +32,11 @@ class CategoryRoomDataSource(
 		return categoryDao.deleteAll()
 	}
 	
+	override suspend fun deleteContactCategory(category: Category, contactId: Long) {
+		categoryDao.deleteCategoryOfContact(DbContactCategory(contactId, category.categoryName))
+	}
 	
+	override suspend fun insertContactCategory(category: Category, contactId: Long) {
+		categoryDao.insertCategoryOfContact(DbContactCategory(contactId, category.categoryName))
+	}
 }

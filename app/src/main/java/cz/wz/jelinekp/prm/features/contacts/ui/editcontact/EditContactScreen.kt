@@ -1,5 +1,6 @@
 package cz.wz.jelinekp.prm.features.contacts.ui.editcontact
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
@@ -45,7 +46,6 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cz.wz.jelinekp.prm.R
-import cz.wz.jelinekp.prm.features.contacts.model.ContactCategory
 import cz.wz.jelinekp.prm.features.contacts.ui.components.LastContactedDatePicker
 import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDateTime
@@ -61,7 +61,9 @@ fun EditContactScreen(
     val validationFlow by viewModel.validationSharedFlowStream.collectAsStateWithLifecycle(
         initialValue = EditContactValidationState()
     )
-
+    
+    Log.d("EditContactScreen", "Screen state contact value: ${screenState.contact}")
+    
     val nameFocusRequester = remember { FocusRequester() }
     val countryFocusRequester = remember { FocusRequester() }
     val contactMethodFocusRequester = remember { FocusRequester() }
@@ -128,6 +130,9 @@ fun EditContactScreen(
                     .verticalScroll(state = ScrollState(0)),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                
+                Log.d("EditContactScreen", "Screen state contact value in Column Scope: ${screenState.contact}")
+                
                 ContactTextField(
                     label = stringResource(id = R.string.name),
                     inputText = screenState.contact.name,
@@ -230,7 +235,7 @@ fun EditContactScreen(
                     screenState.allCategories.forEach { category ->
                         FilterChip(
                             selected = screenState.activeCategories.contains(category),
-                            onClick = { viewModel.updateCategory(category) },
+                            onClick = { viewModel.updateActiveCategories(category) },
                             label = {
                                 Text(
                                     text = category.categoryName

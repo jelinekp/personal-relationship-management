@@ -30,4 +30,12 @@ class CategoryRepository(
 	suspend fun deleteAll() {
 		return categoryLocalDataSource.deleteAll()
 	}
+	
+	suspend fun deleteContactCategory(category: Category, contactId: Long) {
+		return categoryLocalDataSource.deleteContactCategory(category, contactId)
+	}
+	
+	suspend fun insertContactCategory(category: Category, contactId: Long) {
+		return categoryLocalDataSource.insertContactCategory(category, contactId)
+	}
 }
