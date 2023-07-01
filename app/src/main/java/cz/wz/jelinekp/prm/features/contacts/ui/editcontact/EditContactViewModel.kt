@@ -1,5 +1,6 @@
 package cz.wz.jelinekp.prm.features.contacts.ui.editcontact
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -32,7 +33,8 @@ class EditContactViewModel(
     init {
         viewModelScope.launch {
             val contactId: String? = savedStateHandle[Screen.EditContactScreen.ID]
-            val contactFlow = if (contactId == null || contactId == "null")
+            Log.d("contactId", "$contactId")
+            val contactFlow = if (contactId == null || contactId == "null" || contactId == "")
                 flowOf(Contact.emptyContact)
             else
                 contactRepository.getContactById(contactId.toLong())
