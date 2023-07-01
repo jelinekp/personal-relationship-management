@@ -15,8 +15,8 @@ class ContactRepository(
 		return contactLocalDataSource.getAllContacts()
 	}
 	
-	suspend fun addContact(contact: Contact) {
-		val id = contactLocalDataSource.insertContact(contact)
+	suspend fun addContact(contact: Contact) : Long {
+		return contactLocalDataSource.insertContact(contact)
 	}
 	suspend fun syncContactsToFirebase() : Boolean {
 		return firebaseDataStore.syncToFirebase(contactLocalDataSource.getAllContacts().first())

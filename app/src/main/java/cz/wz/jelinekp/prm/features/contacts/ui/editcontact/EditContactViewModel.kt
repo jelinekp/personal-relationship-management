@@ -5,10 +5,12 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cz.wz.jelinekp.prm.features.categories.data.CategoryRepository
+import cz.wz.jelinekp.prm.features.categories.data.db.ContactWithCategories
 import cz.wz.jelinekp.prm.features.categories.model.Category
 import cz.wz.jelinekp.prm.features.contacts.data.ContactRepository
 import cz.wz.jelinekp.prm.features.contacts.model.Contact
 import cz.wz.jelinekp.prm.navigation.Screen
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -39,18 +41,18 @@ class EditContactViewModel(
     init {
         viewModelScope.launch {
             val contactId: String? = savedStateHandle[Screen.EditContactScreen.ID]
-            Log.d("contactId", ">$contactId<")
-            val contactFlow = if (contactId == null || contactId == "null" || contactId == "")
-                flowOf(Contact.emptyContact)
-            else contactRepository.getContactById(contactId.toLong())
-
-            if (contactId == null || contactId == "null" || contactId == "")
+            var contactFlow: Flow<Contact?> = flowOf(Contact.emptyContact)
+            val allCategoriesFlow = categoryRepository.getAllCategoryFromRoom()
+            var activeCategoriesFlow: Flow<ContactWithCategories> = emptyFlow()
+                
+            if (contactId == null || contactId == "null" || contactId == "") {
                 _screenStateStream.update {
                     it.copy(isAddingNewContact = true)
                 }
-            
-            val allCategoriesFlow = categoryRepository.getAllCategoryFromRoom()
-            val activeCategoriesFlow = contactId?.let { categoryRepository.getCategoriesOfContact(it.toLong()) } ?: emptyFlow()
+            } else {
+                contactFlow = contactRepository.getContactById(contactId.toLong())
+                activeCategoriesFlow = categoryRepository.getCategoriesOfContact(contactId.toLong())
+            }
             
             combine(contactFlow, allCategoriesFlow, activeCategoriesFlow) { contact, allCategories, activeCategories ->
                 EditContactScreenState(
