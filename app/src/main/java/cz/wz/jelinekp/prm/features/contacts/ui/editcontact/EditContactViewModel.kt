@@ -44,7 +44,7 @@ class EditContactViewModel(
             var contactFlow: Flow<Contact?> = flowOf(Contact.emptyContact)
             val allCategoriesFlow = categoryRepository.getAllCategoryFromRoom()
             var activeCategoriesFlow: Flow<ContactWithCategories> = emptyFlow()
-                
+            
             if (contactId == null || contactId == "null" || contactId == "") {
                 _screenStateStream.update {
                     it.copy(isAddingNewContact = true)
@@ -55,6 +55,7 @@ class EditContactViewModel(
             }
             
             combine(contactFlow, allCategoriesFlow, activeCategoriesFlow) { contact, allCategories, activeCategories ->
+                Log.d("Category repository", "update - $allCategories")
                 EditContactScreenState(
                     contact = contact!!,
                     allCategories = allCategories,

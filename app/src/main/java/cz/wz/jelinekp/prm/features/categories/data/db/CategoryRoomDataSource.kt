@@ -39,4 +39,8 @@ class CategoryRoomDataSource(
 	override suspend fun insertContactCategory(category: Category, contactId: Long) {
 		categoryDao.insertCategoryOfContact(DbContactCategory(contactId, category.categoryName))
 	}
+	
+	override suspend fun insert(syncedCategories: List<Category>) {
+		categoryDao.insert(syncedCategories.map { it.toDbCategory() })
+	}
 }

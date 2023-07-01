@@ -1,19 +1,15 @@
 package cz.wz.jelinekp.prm.features.signin.data
 
-import android.app.Activity
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.auth.OAuthProvider
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import cz.wz.jelinekp.prm.features.signin.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 
 class UserRepository(
-    private val auth: FirebaseAuth,
+    auth: FirebaseAuth,
     private val remoteConfig: FirebaseRemoteConfig,
     private val analytics: FirebaseAnalytics,
 ) {
@@ -28,33 +24,11 @@ class UserRepository(
     }
 
     init {
-        auth.addAuthStateListener { auth ->
-            val user = auth.currentUser?.toUser()
+        auth.addAuthStateListener { firebaseAuth ->
+            val user = firebaseAuth.currentUser?.toUser()
             _userStream.value = user
             analytics.setUserId(user?.id)
         }
-    }
-
-    fun signInWithGoogle(activity: Activity) {
-        val scopes = listOf("email", "profile")
-        val provider = OAuthProvider.newBuilder(GoogleAuthProvider.PROVIDER_ID, auth)
-            .setScopes(scopes)
-            .build()
-
-        auth.startActivityForSignInWithProvider(activity, provider)
-    }
-
-    fun signInWithEmail(activity: Activity) {
-        val scopes = listOf("email", "profile")
-        val provider = OAuthProvider.newBuilder(EmailAuthProvider.PROVIDER_ID, auth)
-            .setScopes(scopes)
-            .build()
-
-        auth.startActivityForSignInWithProvider(activity, provider)
-    }
-
-    fun signOut() {
-        auth.signOut()
     }
 
     private fun FirebaseUser.toUser(): User {

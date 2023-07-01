@@ -40,6 +40,8 @@ interface CategoryDao {
 	@Query("DELETE FROM contact_category WHERE id = :contactId")
 	suspend fun deleteCategoriesOfContact(contactId: Long)
 	
+	@Insert(onConflict = OnConflictStrategy.REPLACE)
+	suspend fun insert(syncedCategories: List<DbCategory>)
 	
 	
 }

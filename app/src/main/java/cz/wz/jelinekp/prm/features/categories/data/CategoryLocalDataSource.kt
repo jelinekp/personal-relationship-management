@@ -19,5 +19,6 @@ interface CategoryLocalDataSource {
 	suspend fun deleteAll()
 	suspend fun deleteContactCategory(category: Category, contactId: Long)
 	suspend fun insertContactCategory(category: Category, contactId: Long)
+	suspend fun insert(syncedCategories: List<Category>)
 	
 }

@@ -8,7 +8,7 @@ import java.time.ZoneOffset
 data class FirebaseContact(
     val id: Long = 0,
     val name: String = "",
-    val categories: String = "other",
+    val categories: String = "",
     val lastContacted: Long = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC),
     val country: String? = "",
     val contactMethod: String? = "",

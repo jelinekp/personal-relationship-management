@@ -4,10 +4,11 @@ import android.util.Log
 import androidx.core.os.bundleOf
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.database.FirebaseDatabase
+import cz.wz.jelinekp.prm.features.categories.data.firebase.FirebaseCategory
+import cz.wz.jelinekp.prm.features.categories.model.Category
 import cz.wz.jelinekp.prm.features.contacts.model.Contact
 import cz.wz.jelinekp.prm.features.signin.data.UserRepository
 import cz.wz.jelinekp.prm.features.signin.model.User
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
@@ -33,29 +34,40 @@ class FirebaseDataStore(
         it != null
     }
 
-    suspend fun syncFromFirebase() : List<Contact> {
+    suspend fun syncContactsFromFirebase() : List<Contact> {
         val user = filteredUserFlow().first()!!
-        Log.d(TAG, "---------------------- user ${user.name}")
-        Log.d(TAG, "Firebase path: $USERS_NODE/${user.id}/$CONTACTS_NODE")
         val contactReference = firebaseDatabase.getReference("$USERS_NODE/${user.id}/$CONTACTS_NODE")
         val firebaseContactList = contactReference.get().await().children.map { snapshot ->
             snapshot.getValue(FirebaseContact::class.java)!!.toContact()
         }
-        Log.d(TAG, "Syncing from FIREBASE $firebaseContactList")
         return firebaseContactList
     }
+    
+    suspend fun syncCategoriesFromFirebase() : List<Category> {
+        val user = filteredUserFlow().first()!!
+        val categoriesReference = firebaseDatabase.getReference("$USERS_NODE/${user.id}/$CATEGORIES_NODE")
+        val firebaseCategoryList = categoriesReference.get().await().children.map { snapshot ->
+            snapshot.getValue(FirebaseCategory::class.java)!!.toCategory()
+        }
+        return firebaseCategoryList
+    }
 
-    suspend fun syncToFirebase(contacts: List<Contact>) : Boolean {
+    suspend fun syncToFirebase(contacts: List<Contact>, categories: List<Category>) : Boolean {
         val user = userRepository.userStream.first() ?: return false
         val contactsReference = firebaseDatabase.getReference("$USERS_NODE/${user.id}/$CONTACTS_NODE")
-        Log.d(TAG, "Uploading to Firebase: ${contacts.map { it.toFirebaseContact() }}")
+        
         contactsReference.setValue(contacts.map { it.toFirebaseContact() })
+        
+        val categoriesReference = firebaseDatabase.getReference("$USERS_NODE/${user.id}/$CATEGORIES_NODE")
+        categoriesReference.setValue(categories.map { it.toFirebaseCategory() })
+        
         return true
     }
 
     companion object {
         private const val USERS_NODE = "users"
         private const val CONTACTS_NODE = "contacts"
+        private const val CATEGORIES_NODE = "categories"
 
         private const val CONTACT_ADDED_EVENT_NAME = "contact_added"
 
