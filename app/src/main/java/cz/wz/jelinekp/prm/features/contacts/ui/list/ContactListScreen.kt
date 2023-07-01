@@ -53,7 +53,7 @@ fun ContactListScreen(
         floatingActionButton = { AddContactFab(onClick = { onNavigateToAddContact(null) }) },
     ) { paddingValues ->
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
@@ -164,7 +164,7 @@ fun ContactItem(
         if (expanded)
             MaterialTheme.colorScheme.primaryContainer
         else
-            MaterialTheme.colorScheme.secondaryContainer
+            MaterialTheme.colorScheme.secondaryContainer, label = ""
     )
 
     val context = LocalContext.current
@@ -253,19 +253,19 @@ fun MoreContactInfo(
     contact: Contact
 ) {
     Column() {
-        if (contact.country != null) {
+        if (!contact.country.isNullOrBlank()) {
             Text(
                 text = stringResource(id = R.string.country_colon_value, contact.country),
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
-        if (contact.contactMethod != null) {
+        if (!contact.contactMethod.isNullOrBlank()) {
             Text(
                 text = stringResource(id = R.string.contactMethod_colon_value, contact.contactMethod),
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
-        if (contact.note != null) {
+        if (!contact.note.isNullOrBlank()) {
             Text(
                 text = stringResource(id = R.string.note_colon_value, contact.note),
                 style = MaterialTheme.typography.bodyMedium,

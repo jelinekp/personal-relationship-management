@@ -4,14 +4,14 @@ buildscript {
         kotlin_version = '1.7.20'
         viewmodel_version = '2.5.1'
         material_version = '1.4.0-alpha01'
-        navigation_compose_version = '2.5.3'
+        navigation_compose_version = '2.6.0'
         compose_version = '1.4.3'
         material3_version = '1.1.0-beta01'
         lifecycle_version = "2.6.1"
         nav_version = '2.5.3'
         okHttpVersion = '4.10.0'
         coilVersion = '2.2.2'
-        room_version = '2.5.1'
+        room_version = '2.5.2'
         koin_android_version = '3.4.0'
     }
     repositories {
@@ -21,7 +21,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.google.gms:google-services:4.3.15'
-        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.5'
+        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.6'
     }
 }
 

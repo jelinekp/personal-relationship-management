@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Personal Relationship Management</string>
     <string name="who_to_contact">Who to contact</string>
     <string name="contacted_today">Contacted today</string>
@@ -47,4 +47,13 @@
     <string name="professional">Professional</string>
     <string name="backup_data_online">Backup data online</string>
     <string name="download_online_data">Download online stored data</string>
+    <string name="web_client_id" tools:ignore="TypographyDashes">792469487528-7ockp0v5lavdbmfrm5992hjkirrksg19.apps.googleusercontent.com</string>
+    <string name="profile_picture">Profile picture</string>
+    <string name="data_successfully_synced_from_firebase">Data successfully synced from Firebase</string>
+    <string name="data_successfully_synced_to_firebase">Data successfully synced to Firebase</string>
+    <string name="sign_in">Sign In</string>
+    <string name="do_you_really_want_to_rewrite_online_data_with_stored_data">Do you really want to rewrite online data with local data?</string>
+    <string name="do_you_really_want_to_rewrite_stored_data_with_online_data">Do you really want to rewrite local data with online data?</string>
+    <string name="signed_in_as">Signed in as</string>
+    <string name="confirm">Confirm</string>
 </resources>
