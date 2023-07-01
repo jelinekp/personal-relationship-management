@@ -14,7 +14,7 @@ import cz.wz.jelinekp.prm.features.contacts.data.db.ContactDao
 import cz.wz.jelinekp.prm.features.contacts.data.db.Converters
 import cz.wz.jelinekp.prm.features.contacts.data.db.DbContact
 
-@Database(entities = [DbContact::class, DbCategory::class, DbContactCategory::class], version = 5)
+@Database(entities = [DbContact::class, DbCategory::class, DbContactCategory::class], version = 6)
 @TypeConverters(Converters::class)
 abstract class ContactDb : RoomDatabase() {
 
@@ -39,7 +39,7 @@ abstract class ContactDb : RoomDatabase() {
 			ContactDb::class.java,
 			"contacts"
 		)
-			//.fallbackToDestructiveMigration()
+			.fallbackToDestructiveMigration()
 			//.createFromAsset("database/contacts.db")
 			//.addMigrations(migration_4_5)
 			.build()

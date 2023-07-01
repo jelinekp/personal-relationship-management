@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import cz.wz.jelinekp.prm.features.categories.data.CategoryRepository
+import cz.wz.jelinekp.prm.features.categories.model.Category
 import cz.wz.jelinekp.prm.features.contacts.data.ContactRepository
 import cz.wz.jelinekp.prm.features.contacts.model.Contact
 import cz.wz.jelinekp.prm.features.contacts.model.ContactCategory
@@ -19,17 +21,20 @@ import java.time.LocalDateTime
 
 class EditContactViewModel(
     private val savedStateHandle: SavedStateHandle,
-    private val contactRepository: ContactRepository
+    private val contactRepository: ContactRepository,
+    private val categoryRepository: CategoryRepository,
 ) : ViewModel() {
-
+    
     private val _screenStateStream = MutableStateFlow<EditContactScreenState>(
-        EditContactScreenState(Contact.emptyContact)
+        EditContactScreenState(
+            contact = Contact.emptyContact,
+        ),
     )
     val screenStateStream get() = _screenStateStream.asStateFlow()
 
     private val _validationSharedFlowStream = MutableSharedFlow<EditContactValidationState>()
     val validationSharedFlowStream get() = _validationSharedFlowStream.asSharedFlow()
-
+    
     init {
         viewModelScope.launch {
             val contactId: String? = savedStateHandle[Screen.EditContactScreen.ID]
@@ -43,15 +48,32 @@ class EditContactViewModel(
                 _screenStateStream.update {
                     it.copy(isAddingNewContact = true)
                 }
+            
+            getAllCategoriesLatest()
 
             contactFlow.collect { contact ->
                 _screenStateStream.update {
-                    it.copy(contact = contact!!)
+                    var activeCategories = emptyList<Category>()
+                    if (contact != null) {
+                        categoryRepository.getCategoriesOfContact(contact.id).collect {
+                            activeCategories = it.categories
+                        }
+                    }
+                    it.copy(
+                        contact = contact!!,
+                        activeCategories = activeCategories
+                    )
                 }
             }
         }
     }
-
+    
+    private suspend fun getAllCategoriesLatest() {
+        categoryRepository.getAllCategoryFromRoom().collect { categories ->
+            _screenStateStream.update { it.copy(allCategories = categories) }
+        }
+    }
+    
     private fun validateInputs() : Boolean {
         if (_screenStateStream.value.contact.lastContacted >= LocalDateTime.now()) {
             viewModelScope.launch {
@@ -92,13 +114,13 @@ class EditContactViewModel(
         updateContactState(_screenStateStream.value.contact.copy(name = name))
     }
 
-    fun updateCategory(category: ContactCategory) {
-        val newCategories = if (_screenStateStream.value.contact.categories.contains(category))
-            _screenStateStream.value.contact.categories - category
+    fun updateCategory(category: Category) {
+        val newCategories = if (_screenStateStream.value.activeCategories.contains(category))
+            _screenStateStream.value.activeCategories - category
         else
-            _screenStateStream.value.contact.categories + category
+            _screenStateStream.value.activeCategories + category
 
-        updateContactState(_screenStateStream.value.contact.copy(categories = newCategories))
+        _screenStateStream.update { it.copy(activeCategories = newCategories) }
     }
 
     fun updateCountry(country: String) {
@@ -134,10 +156,12 @@ class EditContactViewModel(
 
     fun addCategory() {
         _screenStateStream.value.newCategoryName?.let {
-            val newCategory = ContactCategory.Custom(it)
-            if (!_screenStateStream.value.displayedCategories.contains(newCategory)) {
+            val newCategory = Category(it)
+            // val newCategory = ContactCategory.Custom(it)
+            if (!_screenStateStream.value.activeCategories.contains(newCategory)) {
+                viewModelScope.launch { categoryRepository.insertCategory(newCategory) }
                 _screenStateStream.value = _screenStateStream.value.copy(
-                    displayedCategories = _screenStateStream.value.displayedCategories + newCategory
+                    activeCategories = _screenStateStream.value.activeCategories + newCategory
                 )
             }
         }
@@ -150,9 +174,10 @@ data class EditContactScreenState(
     val isShowingLastContactedDatePicker: Boolean = false,
     val isShowingAddCategoryModal: Boolean = false,
     val isAddingNewContact: Boolean = false,
-    val displayedCategories: List<ContactCategory> = listOf(ContactCategory.Family, ContactCategory.Friends),
+    val activeCategories: List<Category> = emptyList(),
+    val allCategories: List<Category> = emptyList(),
     val newCategoryName: String? = null,
-)
+    )
 
 data class EditContactValidationState(
     val isNameError: Boolean = false,

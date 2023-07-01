@@ -227,16 +227,13 @@ fun EditContactScreen(
 
                 Text(text = stringResource(R.string.select_categories))
                 FlowRow() {
-                    screenState.displayedCategories.forEach { category ->
+                    screenState.allCategories.forEach { category ->
                         FilterChip(
-                            selected = screenState.contact.categories.contains(category),
+                            selected = screenState.activeCategories.contains(category),
                             onClick = { viewModel.updateCategory(category) },
                             label = {
                                 Text(
-                                    text = when (category) {
-                                        is ContactCategory.Custom -> category.customName
-                                        else -> stringResource(id = category.stringResource)
-                                    }
+                                    text = category.categoryName
                                 )
                             },
                             modifier = Modifier.padding(end = 8.dp)

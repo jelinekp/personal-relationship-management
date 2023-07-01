@@ -33,7 +33,6 @@ class FirebaseDataStore(
         it != null
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     suspend fun syncFromFirebase() : List<Contact> {
         val user = filteredUserFlow().first()!!
         Log.d(TAG, "---------------------- user ${user.name}")

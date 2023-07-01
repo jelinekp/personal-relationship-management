@@ -18,7 +18,7 @@ val contactModule get() = module {
 
     factoryOf(::FirebaseDataStore)
     factoryOf(::ContactRepository)
-
+    
     viewModelOf(::ContactListViewModel)
     viewModelOf(::EditContactViewModel)
 
