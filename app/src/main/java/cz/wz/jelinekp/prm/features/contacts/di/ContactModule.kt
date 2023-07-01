@@ -16,16 +16,10 @@ val contactModule get() = module {
     single { get<ContactDb>().contactDao() }
     factory<ContactLocalDataSource> { ContactRoomDataSource(contactDao = get()) }
 
-    // This should be in the coreModule
-    // single { get<FirebaseInstance>().getInstance() }
-    // factory<FirebaseDataStore> { FirebaseDataStore(get(), get(), get()) }
-
-
     factoryOf(::FirebaseDataStore)
     factoryOf(::ContactRepository)
 
     viewModelOf(::ContactListViewModel)
     viewModelOf(::EditContactViewModel)
-    // viewModelOf(::SearchViewModel)
 
 }
