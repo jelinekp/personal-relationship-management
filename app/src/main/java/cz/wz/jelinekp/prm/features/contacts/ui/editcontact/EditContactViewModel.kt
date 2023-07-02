@@ -1,12 +1,9 @@
 package cz.wz.jelinekp.prm.features.contacts.ui.editcontact
 
 import android.util.Log
-import android.widget.Toast
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import cz.wz.jelinekp.prm.features.categories.data.CategoryRepository
 import cz.wz.jelinekp.prm.features.categories.data.db.ContactWithCategories
 import cz.wz.jelinekp.prm.features.categories.model.Category
@@ -21,7 +18,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
@@ -99,14 +95,16 @@ class EditContactViewModel(
     fun applyChanges() : Boolean {
         val contactId = _screenStateStream.value.contact.id
         
-        viewModelScope.launch {
-            _screenStateStream.value.allCategories.forEach {
-                categoryRepository.deleteContactCategory(it, contactId)
-            }
-        }
-        
         if (validateInputs()) {
+            val deleteCoroutine = viewModelScope.launch {
+                _screenStateStream.value.allCategories.forEach {
+                    categoryRepository.deleteContactCategory(it, contactId)
+                }
+            }
+            
             viewModelScope.launch {
+                deleteCoroutine.join() // waiting for the delete to finish before inserting again
+                
                 contactRepository.updateContact(_screenStateStream.value.contact).also {
                     _screenStateStream.value.activeCategories.forEach {
                         categoryRepository.insertContactCategory(it, contactId)
