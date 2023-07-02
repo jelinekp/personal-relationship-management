@@ -27,6 +27,14 @@ class ContactRepository(
 	}
 
 	suspend fun syncContactsFromFirebase() : Boolean {
+		
+		val syncedCategories = firebaseDataStore.syncCategoriesFromFirebase()
+		
+		if (syncedCategories.isNotEmpty())
+			categoryLocalDataSource.deleteAll()
+		
+		categoryLocalDataSource.insert(syncedCategories)
+		
 		val syncedContacts = firebaseDataStore.syncContactsFromFirebase()
 		
 		if (syncedContacts.isEmpty())
@@ -35,10 +43,6 @@ class ContactRepository(
 		contactLocalDataSource.deleteAll()
 		contactLocalDataSource.insert(syncedContacts)
 		
-		val syncedCategories = firebaseDataStore.syncCategoriesFromFirebase()
-		if (syncedCategories.isNotEmpty())
-			categoryLocalDataSource.deleteAll()
-		categoryLocalDataSource.insert(syncedCategories)
 		return true
 	}
 

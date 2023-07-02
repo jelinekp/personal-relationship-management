@@ -15,8 +15,10 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -47,7 +49,10 @@ class EditContactViewModel(
             
             if (contactId == null || contactId == "null" || contactId == "") {
                 _screenStateStream.update {
-                    it.copy(isAddingNewContact = true)
+                    it.copy(
+                        isAddingNewContact = true,
+                        allCategories = allCategoriesFlow.first()
+                    )
                 }
             } else {
                 contactFlow = contactRepository.getContactById(contactId.toLong())
@@ -61,7 +66,7 @@ class EditContactViewModel(
                     allCategories = allCategories,
                     activeCategories = activeCategories.categories,
                     )
-            }.collect { newScreenState ->
+            }.collectLatest { newScreenState ->
                 _screenStateStream.update { _ ->
                     newScreenState
                 }
@@ -109,6 +114,11 @@ class EditContactViewModel(
 
     fun updateActiveCategories(category: Category) {
         val contactId = screenStateStream.value.contact.id
+        
+        if (_screenStateStream.value.isAddingNewContact) {
+        
+        }
+        
         viewModelScope.launch {
             if (_screenStateStream.value.activeCategories.contains(category))
                 categoryRepository.deleteContactCategory(category, contactId)
@@ -133,7 +143,7 @@ class EditContactViewModel(
         viewModelScope.launch {
             _validationSharedFlowStream.emit(EditContactValidationState(isLastContactedError = false))
         }
-        updateContactState(_screenStateStream.value.contact.copy(lastContacted = lastContacted))
+        updateContactState(_screenStateStream.value.contact.copy(lastContacted = lastContacted.plusDays(1)))
     }
 
     fun showLastContactedDatePicker(isShowing: Boolean) {
@@ -155,6 +165,7 @@ class EditContactViewModel(
             if (!_screenStateStream.value.activeCategories.contains(newCategory)) {
                 viewModelScope.launch { categoryRepository.insertCategory(newCategory) }
                 _screenStateStream.value = _screenStateStream.value.copy(
+                    allCategories = _screenStateStream.value.allCategories + newCategory,
                     activeCategories = _screenStateStream.value.activeCategories + newCategory
                 )
             }

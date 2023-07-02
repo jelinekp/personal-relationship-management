@@ -1,5 +1,6 @@
 package cz.wz.jelinekp.prm.features.contacts.data.firebase
 
+import cz.wz.jelinekp.prm.features.categories.data.firebase.FirebaseCategory
 import cz.wz.jelinekp.prm.features.contacts.data.db.DbContact
 import cz.wz.jelinekp.prm.features.contacts.model.Contact
 import java.time.LocalDateTime
@@ -8,7 +9,7 @@ import java.time.ZoneOffset
 data class FirebaseContact(
     val id: Long = 0,
     val name: String = "",
-    val categories: String = "",
+    val categories: List<FirebaseCategory> = emptyList(),
     val lastContacted: Long = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC),
     val country: String? = "",
     val contactMethod: String? = "",
