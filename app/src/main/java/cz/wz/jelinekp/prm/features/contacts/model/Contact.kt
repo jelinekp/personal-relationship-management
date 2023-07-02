@@ -1,7 +1,6 @@
 package cz.wz.jelinekp.prm.features.contacts.model
 
 import cz.wz.jelinekp.prm.features.categories.data.firebase.FirebaseCategory
-import cz.wz.jelinekp.prm.features.categories.model.Category
 import cz.wz.jelinekp.prm.features.contacts.data.db.DbContact
 import cz.wz.jelinekp.prm.features.contacts.data.firebase.FirebaseContact
 import java.time.LocalDateTime

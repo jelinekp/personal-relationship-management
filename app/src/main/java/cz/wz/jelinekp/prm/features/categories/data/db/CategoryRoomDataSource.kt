@@ -2,6 +2,7 @@ package cz.wz.jelinekp.prm.features.categories.data.db
 
 import cz.wz.jelinekp.prm.features.categories.data.CategoryLocalDataSource
 import cz.wz.jelinekp.prm.features.categories.model.Category
+import cz.wz.jelinekp.prm.features.contacts.model.Contact
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -13,7 +14,9 @@ class CategoryRoomDataSource(
 	}
 	
 	override fun getCategoriesOfContact(contactId: Long): Flow<ContactWithCategories> {
-		return categoryDao.getCategoriesOfContact(contactId).map { it.toContactWithCategories() }
+		return categoryDao.getCategoriesOfContact(contactId).map { it?.toContactWithCategories() ?: ContactWithCategories(
+			Contact.emptyContact, emptyList()
+		) }
 	}
 	
 	override suspend fun insertCategory(category: Category) {

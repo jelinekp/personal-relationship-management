@@ -100,7 +100,10 @@ fun EditContactScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = navigateUp) {
+                    IconButton(onClick = {
+                        viewModel.revertChanges()
+                        navigateUp()
+                    }) {
                         Icon(
                             Icons.Default.Clear,
                             contentDescription = stringResource(R.string.back_icon)

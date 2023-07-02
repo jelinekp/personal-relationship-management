@@ -17,7 +17,7 @@ interface CategoryDao {
 	
 	@Transaction
 	@Query("SELECT * FROM contact WHERE id = :contactId")
-	fun getCategoriesOfContact(contactId: Long) : Flow<DbContactWithDbCategories>
+	fun getCategoriesOfContact(contactId: Long) : Flow<DbContactWithDbCategories?>
 	
 	@Insert(onConflict = OnConflictStrategy.IGNORE)
 	suspend fun insertCategory(category: DbCategory)

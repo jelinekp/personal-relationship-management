@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
@@ -46,8 +47,10 @@ class EditContactViewModel(
             var contactFlow: Flow<Contact?> = flowOf(Contact.emptyContact)
             val allCategoriesFlow = categoryRepository.getAllCategoryFromRoom()
             var activeCategoriesFlow: Flow<ContactWithCategories> = emptyFlow()
+            var contactIdLong : Long = 0
             
             if (contactId == null || contactId == "null" || contactId == "") {
+                contactIdLong = contactRepository.addContact(Contact.emptyContact)
                 _screenStateStream.update {
                     it.copy(
                         isAddingNewContact = true,
@@ -55,17 +58,18 @@ class EditContactViewModel(
                     )
                 }
             } else {
-                contactFlow = contactRepository.getContactById(contactId.toLong())
-                activeCategoriesFlow = categoryRepository.getCategoriesOfContact(contactId.toLong())
+                contactIdLong = contactId.toLong()
             }
+            contactFlow = contactRepository.getContactById(contactIdLong)
+            activeCategoriesFlow = categoryRepository.getCategoriesOfContact(contactIdLong)
             
             combine(contactFlow, allCategoriesFlow, activeCategoriesFlow) { contact, allCategories, activeCategories ->
                 Log.d("Category repository", "update - $allCategories")
-                EditContactScreenState(
-                    contact = contact!!,
+                _screenStateStream.value.copy (
+                    contact = contact ?: Contact.emptyContact,
                     allCategories = allCategories,
                     activeCategories = activeCategories.categories,
-                    )
+                )
             }.collectLatest { newScreenState ->
                 _screenStateStream.update { _ ->
                     newScreenState
@@ -90,12 +94,22 @@ class EditContactViewModel(
     }
 
     fun applyChanges() : Boolean {
-
+        val contactId = _screenStateStream.value.contact.id
+        
+        viewModelScope.launch {
+            _screenStateStream.value.allCategories.forEach {
+                categoryRepository.deleteContactCategory(it, contactId)
+            }
+        }
+        
         if (validateInputs()) {
-            if (_screenStateStream.value.isAddingNewContact)
-                viewModelScope.launch { contactRepository.addContact(screenStateStream.value.contact) }
-            else
-                viewModelScope.launch { contactRepository.updateContact(screenStateStream.value.contact) }
+            viewModelScope.launch {
+                contactRepository.updateContact(_screenStateStream.value.contact).also {
+                    _screenStateStream.value.activeCategories.forEach {
+                        categoryRepository.insertContactCategory(it, contactId)
+                    }
+                }
+            }
             return true
         }
         return false
@@ -115,15 +129,17 @@ class EditContactViewModel(
     fun updateActiveCategories(category: Category) {
         val contactId = screenStateStream.value.contact.id
         
-        if (_screenStateStream.value.isAddingNewContact) {
-        
-        }
-        
         viewModelScope.launch {
             if (_screenStateStream.value.activeCategories.contains(category))
-                categoryRepository.deleteContactCategory(category, contactId)
+                _screenStateStream.update {
+                    _screenStateStream.value.copy(activeCategories = _screenStateStream.value.activeCategories - category)
+                }
+            //categoryRepository.deleteContactCategory(category, contactId)
             else
-                categoryRepository.insertContactCategory(category, contactId)
+                _screenStateStream.update {
+                    _screenStateStream.value.copy(activeCategories = _screenStateStream.value.activeCategories + category)
+                }
+            //categoryRepository.insertContactCategory(category, contactId)
         }
     }
 
@@ -171,7 +187,15 @@ class EditContactViewModel(
             }
         }
     }
-
+    
+    fun revertChanges() {
+        if (_screenStateStream.value.isAddingNewContact) {
+            viewModelScope.launch {
+                contactRepository.deleteContact(_screenStateStream.value.contact.id)
+            }
+        }
+    }
+    
 }
 
 data class EditContactScreenState(
