@@ -1,6 +1,6 @@
 package cz.wz.jelinekp.prm.features.contacts.data
 
-import android.util.Log
+import cz.wz.jelinekp.prm.features.categories.data.CategoryLocalDataSource
 import cz.wz.jelinekp.prm.features.contacts.data.firebase.FirebaseDataStore
 import cz.wz.jelinekp.prm.features.contacts.model.Contact
 import kotlinx.coroutines.flow.Flow
@@ -9,25 +9,40 @@ import java.time.LocalDateTime
 
 class ContactRepository(
 	private val contactLocalDataSource: ContactLocalDataSource,
+	private val categoryLocalDataSource: CategoryLocalDataSource,
 	private val firebaseDataStore: FirebaseDataStore,
 ) {
 	fun getAllContactsFromRoom(): Flow<List<Contact>> {
 		return contactLocalDataSource.getAllContacts()
 	}
 	
-	suspend fun addContact(contact: Contact) {
-		val id = contactLocalDataSource.insertContact(contact)
+	suspend fun addContact(contact: Contact) : Long {
+		return contactLocalDataSource.insertContact(contact)
 	}
 	suspend fun syncContactsToFirebase() : Boolean {
-		return firebaseDataStore.syncToFirebase(contactLocalDataSource.getAllContacts().first())
+		return firebaseDataStore.syncToFirebase(
+			contactLocalDataSource.getAllContacts().first(),
+			categoryLocalDataSource.getAllCategories().first()
+		)
 	}
 
 	suspend fun syncContactsFromFirebase() : Boolean {
-		val syncedContacts = firebaseDataStore.syncFromFirebase()
-		Log.d(TAG, "Synced from firebase")
+		
+		val syncedCategories = firebaseDataStore.syncCategoriesFromFirebase()
+		
+		if (syncedCategories.isNotEmpty())
+			categoryLocalDataSource.deleteAll()
+		
+		categoryLocalDataSource.insert(syncedCategories)
+		
+		val syncedContacts = firebaseDataStore.syncContactsFromFirebase()
+		
 		if (syncedContacts.isEmpty())
 			return false
+
+		contactLocalDataSource.deleteAll()
 		contactLocalDataSource.insert(syncedContacts)
+		
 		return true
 	}
 

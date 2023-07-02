@@ -19,11 +19,8 @@ class ContactListViewModel(
 
 	private val _datePickerScreenStateStream = MutableStateFlow(DatePickerScreenState(showLastContactedDatePicker = null))
 	val datePickerScreenStateStream get() = _datePickerScreenStateStream.asStateFlow()
-
-//	private val _expandedContactsScreenState = MutableStateFlow(ExpandedContactsScreenState())
-
+	
 	init {
-//		viewModelScope.launch { repository.syncContactsFromFirebase() }
 		viewModelScope.launch {
 			repository.getAllContactsFromRoom().collectLatest {
 				_screenStateStream.value = ContactListScreenState.Loaded(it)
@@ -33,7 +30,7 @@ class ContactListViewModel(
 
 	fun updateLastContacted(contactId: Long, lastContacted: LocalDateTime = LocalDateTime.now()) {
 		viewModelScope.launch {
-			repository.updateContactLastContacted(contactId = contactId, lastContacted = lastContacted)
+			repository.updateContactLastContacted(contactId = contactId, lastContacted = lastContacted.plusDays(1))
 		}
 	}
 

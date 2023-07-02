@@ -6,9 +6,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import cz.wz.jelinekp.prm.features.contacts.data.firebase.FirebaseContact
 import cz.wz.jelinekp.prm.features.contacts.model.Contact
-import cz.wz.jelinekp.prm.features.contacts.model.ContactCategory
 import kotlinx.parcelize.Parcelize
-import kotlinx.parcelize.RawValue
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
@@ -20,9 +18,7 @@ data class DbContact (
     val id: Long = 0,
 
     val name: String,
-
-    val category: @RawValue List<ContactCategory> = listOf(ContactCategory.Other),
-
+    
     @ColumnInfo(name = "last_contacted")
     val lastContacted: LocalDateTime = LocalDateTime.now(),
 
@@ -40,7 +36,6 @@ data class DbContact (
     fun toContact() = Contact(
         id = id,
         name = name,
-        categories = category,
         lastContacted = lastContacted,
         country = country,
         contactMethod = contactMethod,
@@ -51,7 +46,7 @@ data class DbContact (
     fun toFirebaseContact() = FirebaseContact(
         id = id,
         name = name,
-        categories = category.toString(),
+        categories = emptyList(),
         lastContacted = lastContacted.toEpochSecond(ZoneOffset.UTC),
         country = country,
         contactMethod = contactMethod,

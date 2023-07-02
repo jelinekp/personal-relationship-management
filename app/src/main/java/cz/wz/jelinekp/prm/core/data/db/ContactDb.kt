@@ -7,15 +7,20 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import cz.wz.jelinekp.prm.features.categories.data.db.CategoryDao
+import cz.wz.jelinekp.prm.features.categories.data.db.DbCategory
+import cz.wz.jelinekp.prm.features.categories.data.db.DbContactCategory
 import cz.wz.jelinekp.prm.features.contacts.data.db.ContactDao
 import cz.wz.jelinekp.prm.features.contacts.data.db.Converters
 import cz.wz.jelinekp.prm.features.contacts.data.db.DbContact
 
-@Database(entities = [DbContact::class], version = 5)
+@Database(entities = [DbContact::class, DbCategory::class, DbContactCategory::class], version = 7)
 @TypeConverters(Converters::class)
 abstract class ContactDb : RoomDatabase() {
 
 	abstract fun contactDao(): ContactDao
+	
+	abstract fun categoryDao(): CategoryDao
 
 	companion object {
 
@@ -29,14 +34,23 @@ abstract class ContactDb : RoomDatabase() {
 				)
 			}
 		}
+		
+		private val migration_6_7: Migration = object: Migration(6, 7) {
+			override fun migrate(database: SupportSQLiteDatabase) {
+				database.execSQL(
+					sql = "ALTER TABLE contact DROP COLUMN category"
+				)
+			}
+		}
+		
 		fun provideContactDb(context : Context): ContactDb = Room.databaseBuilder(
 			context,
 			ContactDb::class.java,
 			"contacts"
 		)
-			//.fallbackToDestructiveMigration()
+			.fallbackToDestructiveMigration()
 			//.createFromAsset("database/contacts.db")
-			//.addMigrations(migration_4_5)
+			//.addMigrations(migration_6_7)
 			.build()
 	}
 }
