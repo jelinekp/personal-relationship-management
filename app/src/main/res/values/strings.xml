@@ -56,4 +56,5 @@
     <string name="do_you_really_want_to_rewrite_stored_data_with_online_data">Do you really want to rewrite local data with online data?</string>
     <string name="signed_in_as">Signed in as</string>
     <string name="confirm">Confirm</string>
+    <string name="are_you_sure_to_delete_contact">Are you sure to delete contact %1$s?</string>
 </resources>

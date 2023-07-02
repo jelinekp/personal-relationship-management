@@ -224,7 +224,35 @@ fun ContactItem(
                         IconButton(onClick = { onEditContactClick(contact.id) }) {
                             Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.edit_contact))
                         }
-                        IconButton(onClick = { onDeleteContact(contact.id) }) {
+                        
+                        val isDeleteDialogOpen = rememberSaveable {
+                            mutableStateOf(false)
+                        }
+                        
+                        if (isDeleteDialogOpen.value) {
+                            AlertDialog(
+                                onDismissRequest = { isDeleteDialogOpen.value = false },
+                                title = { Text(
+                                    text = stringResource(
+                                        R.string.are_you_sure_to_delete_contact,
+                                        contact.name
+                                    ),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                ) },
+                                dismissButton = { TextButton(
+                                    onClick = { isDeleteDialogOpen.value = false },
+                                ) {
+                                    Text(stringResource(id = R.string.cancel))
+                                } },
+                                confirmButton = { TextButton(
+                                    onClick = { onDeleteContact(contact.id) },
+                                ) {
+                                    Text(stringResource(R.string.confirm))
+                                } }
+                            )
+                        }
+                        
+                        IconButton(onClick = { isDeleteDialogOpen.value = true }) {
                             Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete_contact))
                         }
                     }
