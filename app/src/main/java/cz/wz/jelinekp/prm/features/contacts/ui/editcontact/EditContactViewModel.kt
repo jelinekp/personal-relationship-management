@@ -1,9 +1,12 @@
 package cz.wz.jelinekp.prm.features.contacts.ui.editcontact
 
 import android.util.Log
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import cz.wz.jelinekp.prm.features.categories.data.CategoryRepository
 import cz.wz.jelinekp.prm.features.categories.data.db.ContactWithCategories
 import cz.wz.jelinekp.prm.features.categories.model.Category
@@ -175,15 +178,26 @@ class EditContactViewModel(
     }
 
     fun addCategory() {
+        
+        viewModelScope.launch {
+            _validationSharedFlowStream.emit(EditContactValidationState(isCategoryError = false))
+        }
         _screenStateStream.value.newCategoryName?.let {
-            val newCategory = Category(it)
-            
-            if (!_screenStateStream.value.activeCategories.contains(newCategory)) {
-                viewModelScope.launch { categoryRepository.insertCategory(newCategory) }
-                _screenStateStream.value = _screenStateStream.value.copy(
-                    allCategories = _screenStateStream.value.allCategories + newCategory,
-                    activeCategories = _screenStateStream.value.activeCategories + newCategory
-                )
+            if (it.length in 1..30) {
+                val newCategory = Category(it)
+                if (!_screenStateStream.value.activeCategories.contains(newCategory)) {
+                    viewModelScope.launch { categoryRepository.insertCategory(newCategory) }
+                    _screenStateStream.value = _screenStateStream.value.copy(
+                        allCategories = _screenStateStream.value.allCategories + newCategory,
+                        activeCategories = _screenStateStream.value.activeCategories + newCategory
+                    )
+                } else {
+                
+                }
+            } else {
+                viewModelScope.launch {
+                    _validationSharedFlowStream.emit(EditContactValidationState(isCategoryError = true))
+                }
             }
         }
     }

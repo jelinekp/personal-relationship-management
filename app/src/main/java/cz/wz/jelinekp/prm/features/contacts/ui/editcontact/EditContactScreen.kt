@@ -283,7 +283,15 @@ fun EditContactScreen(
                             ContactTextField(
                                 inputText = screenState.newCategoryName ?: "",
                                 onValueChange = { viewModel.updateNewCategoryName(it) },
-                                label = stringResource(R.string.category_name)
+                                label = stringResource(R.string.category_name),
+                                keyboardOptions = KeyboardOptions(
+                                    imeAction = ImeAction.Next,
+                                    capitalization = KeyboardCapitalization.Words
+                                ),
+                                keyboardActions = KeyboardActions(onNext = {
+                                    viewModel.addCategory()
+                                    viewModel.showAddCategoryModal(false)
+                                })
                             )
                         },
                     )
