@@ -218,7 +218,7 @@ data class EditContactScreenState(
     val activeCategories: List<Category> = emptyList(),
     val allCategories: List<Category> = emptyList(),
     val newCategoryName: String? = null,
-    )
+)
 
 data class EditContactValidationState(
     val isNameError: Boolean = false,

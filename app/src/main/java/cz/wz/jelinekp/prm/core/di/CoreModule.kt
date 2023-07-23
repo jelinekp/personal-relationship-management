@@ -6,11 +6,10 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import cz.wz.jelinekp.prm.core.data.db.ContactDb
-import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
 val coreModule get() = module {
-    single { ContactDb.provideContactDb(androidContext()) }
+    single { ContactDb.provideContactDb(get()) }
 
     single {
         FirebaseDatabase.getInstance()
@@ -21,7 +20,7 @@ val coreModule get() = module {
     }
 
     single {
-        FirebaseAnalytics.getInstance(androidContext())
+        FirebaseAnalytics.getInstance(get())
     }
 
     single {

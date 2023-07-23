@@ -13,7 +13,6 @@ import cz.wz.jelinekp.prm.features.signin.model.User
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 
 class FirebaseDataStore(
@@ -78,6 +77,7 @@ class FirebaseDataStore(
 		Log.d(TAG, "firebaseContactToUpload $firebaseContact")
 		return firebaseContact
 	}
+	
 	suspend fun syncToFirebase(contacts: List<Contact>, categories: List<Category>): Boolean {
 		val user = userRepository.userStream.first() ?: return false
 		val contactsReference = firebaseDatabase.getReference("$USERS_NODE/${user.id}/$CONTACTS_NODE")
