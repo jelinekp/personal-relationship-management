@@ -8,7 +8,7 @@ class CategoryRepository(
 	private val categoryLocalDataSource: CategoryLocalDataSource
 ) {
 	fun getAllCategoryFromRoom() : Flow<List<Category>> {
-		return categoryLocalDataSource.getAllCategories()
+		return categoryLocalDataSource.getAllCategoriesFlow()
 	}
 	
 	fun getCategoriesOfContact(contactId: Long) : Flow<ContactWithCategories> {

@@ -9,8 +9,12 @@ import kotlinx.coroutines.flow.map
 class CategoryRoomDataSource(
 	private val categoryDao: CategoryDao
 ) : CategoryLocalDataSource {
-	override fun getAllCategories(): Flow<List<Category>> {
-		return categoryDao.getAllCategories().map { dbCategories -> dbCategories.map { it.toCategory() } }
+	override fun getAllCategoriesFlow(): Flow<List<Category>> {
+		return categoryDao.getAllCategoriesFlow().map { dbCategories -> dbCategories.map { it.toCategory() } }
+	}
+	
+	override suspend fun getAllCategories(): List<Category> {
+		return categoryDao.getAllCategories().map { it.toCategory() }
 	}
 	
 	override fun getCategoriesOfContact(contactId: Long): Flow<ContactWithCategories> {

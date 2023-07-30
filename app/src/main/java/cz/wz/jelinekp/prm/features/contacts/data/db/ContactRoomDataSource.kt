@@ -8,9 +8,11 @@ import java.time.LocalDateTime
 
 class ContactRoomDataSource(private val contactDao: ContactDao) : ContactLocalDataSource {
 
-    override fun getAllContacts(): Flow<List<Contact>> = contactDao.getAllContacts().map { dbContacts ->
+    override fun getAllContactsFlow(): Flow<List<Contact>> = contactDao.getAllContactsFlow().map { dbContacts ->
         dbContacts.map {it.toContact()}
     }
+    
+    override suspend fun getAllContacts(): List<Contact> = contactDao.getAllContacts().map { it.toContact() }
 
     override fun getContact(id: Long): Flow<Contact?> = contactDao.getContact(id).map { it?.toContact() }
 

@@ -6,7 +6,9 @@ import kotlinx.coroutines.flow.Flow
 
 interface CategoryLocalDataSource {
 	
-	fun getAllCategories() : Flow<List<Category>>
+	fun getAllCategoriesFlow() : Flow<List<Category>>
+	
+	suspend fun getAllCategories() : List<Category>
 	
 	fun getCategoriesOfContact(contactId: Long) : Flow<ContactWithCategories>
 	

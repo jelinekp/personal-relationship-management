@@ -4,7 +4,6 @@ import cz.wz.jelinekp.prm.features.categories.data.CategoryLocalDataSource
 import cz.wz.jelinekp.prm.features.contacts.data.firebase.FirebaseDataStore
 import cz.wz.jelinekp.prm.features.contacts.model.Contact
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import java.time.LocalDateTime
 
 class ContactRepository(
@@ -13,7 +12,7 @@ class ContactRepository(
 	private val firebaseDataStore: FirebaseDataStore,
 ) {
 	fun getAllContactsFromRoom(): Flow<List<Contact>> {
-		return contactLocalDataSource.getAllContacts()
+		return contactLocalDataSource.getAllContactsFlow()
 	}
 	
 	suspend fun addContact(contact: Contact) : Long {
@@ -21,8 +20,8 @@ class ContactRepository(
 	}
 	suspend fun syncContactsToFirebase() : Boolean {
 		return firebaseDataStore.syncToFirebase(
-			contactLocalDataSource.getAllContacts().first(),
-			categoryLocalDataSource.getAllCategories().first()
+			contactLocalDataSource.getAllContacts(),
+			categoryLocalDataSource.getAllCategories(),
 		)
 	}
 

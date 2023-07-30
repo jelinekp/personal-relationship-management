@@ -13,7 +13,10 @@ import java.time.LocalDateTime
 interface ContactDao {
 	
 	@Query("SELECT * FROM contact ORDER BY last_contacted ASC")
-	fun getAllContacts() : Flow<List<DbContact>>
+	fun getAllContactsFlow() : Flow<List<DbContact>>
+	
+	@Query("SELECT * FROM contact ORDER BY last_contacted ASC")
+	suspend fun getAllContacts(): List<DbContact>
 
 	@Query("SELECT * FROM contact WHERE id = :id")
 	fun getContact(id: Long): Flow<DbContact?>

@@ -13,4 +13,14 @@ data class Category(
 	fun toFirebaseCategory() : FirebaseCategory {
 		return FirebaseCategory(categoryName = categoryName)
 	}
+	
+	override fun equals(other: Any?): Boolean {
+		if (this === other) return true
+		if (other !is Category) return false
+		return this.categoryName == other.categoryName
+	}
+	
+	override fun hashCode(): Int {
+		return categoryName.hashCode()
+	}
 }

@@ -13,7 +13,10 @@ import kotlinx.coroutines.flow.Flow
 interface CategoryDao {
 
 	@Query("SELECT * FROM category")
-	fun getAllCategories() : Flow<List<DbCategory>>
+	fun getAllCategoriesFlow() : Flow<List<DbCategory>>
+	
+	@Query("SELECT * FROM category")
+	suspend fun getAllCategories() : List<DbCategory>
 	
 	@Transaction
 	@Query("SELECT * FROM contact WHERE id = :contactId")

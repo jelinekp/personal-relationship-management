@@ -6,7 +6,9 @@ import java.time.LocalDateTime
 
 interface ContactLocalDataSource {
 
-    fun getAllContacts(): Flow<List<Contact>>
+    fun getAllContactsFlow(): Flow<List<Contact>>
+    
+    suspend fun getAllContacts(): List<Contact>
 
     fun getContact(id: Long): Flow<Contact?>
 
