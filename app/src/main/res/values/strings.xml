@@ -57,4 +57,7 @@
     <string name="signed_in_as">Signed in as</string>
     <string name="confirm">Confirm</string>
     <string name="are_you_sure_to_delete_contact">Are you sure to delete contact %1$s?</string>
+    <string name="delete_category">Are you sure to delete category %s?</string>
+    <string name="delete_cat">Delete</string>
+    <string name="drag_here_to_delete_category">Drag here to delete category</string>
 </resources>

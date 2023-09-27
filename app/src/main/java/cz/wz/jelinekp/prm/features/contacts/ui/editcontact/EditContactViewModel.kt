@@ -213,11 +213,48 @@ class EditContactViewModel(
         }
     }
     
+    fun setChipDragged(category: Category) {
+        _screenStateStream.update { it.copy(draggedCategory = category) }
+    }
+    
+    fun dragToDelete() {
+        _screenStateStream.update {
+            it.copy(
+                isShowingAddCategoryModal = true
+            )
+        }
+    }
+    
+    fun abortDeletionOfCategory() {
+        _screenStateStream.update {
+            it.copy(isShowingAddCategoryModal = false)
+        }
+        stopChipDragging()
+    }
+    
+    fun deleteCategory() {
+        viewModelScope.launch {
+            _screenStateStream.value.draggedCategory?.let { categoryRepository.deleteCategory(it) }
+            _screenStateStream.update {
+                it.copy(
+                    draggedCategory = null,
+                    isShowingAddCategoryModal = false
+                )
+            }
+        }
+    }
+    
     fun revertChanges() {
         if (_screenStateStream.value.isAddingNewContact) {
             viewModelScope.launch {
                 contactRepository.deleteContact(_screenStateStream.value.contact.id)
             }
+        }
+    }
+    
+    fun stopChipDragging() {
+        _screenStateStream.update {
+            it.copy(draggedCategory = null)
         }
     }
     
@@ -231,10 +268,12 @@ data class EditContactScreenState(
     val contact: Contact,
     val isShowingLastContactedDatePicker: Boolean = false,
     val isShowingAddCategoryModal: Boolean = false,
+    val isShowingDeleteCategoryModal: Boolean = false,
     val isAddingNewContact: Boolean = false,
     val activeCategories: List<Category> = emptyList(),
     val allCategories: List<Category> = emptyList(),
     val newCategoryName: String? = null,
+    val draggedCategory: Category? = null,
 )
 
 data class EditContactValidationState(

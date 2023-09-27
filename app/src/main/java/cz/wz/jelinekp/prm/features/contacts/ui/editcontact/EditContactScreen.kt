@@ -2,6 +2,8 @@ package cz.wz.jelinekp.prm.features.contacts.ui.editcontact
 
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -19,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
@@ -27,25 +31,34 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cz.wz.jelinekp.prm.R
+import cz.wz.jelinekp.prm.features.categories.draganddrop.DragTarget
+import cz.wz.jelinekp.prm.features.categories.draganddrop.DropItem
+import cz.wz.jelinekp.prm.features.categories.draganddrop.LocalDragTargetInfo
+import cz.wz.jelinekp.prm.features.categories.model.Category
 import cz.wz.jelinekp.prm.features.contacts.ui.components.LastContactedDatePicker
 import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDateTime
@@ -61,6 +74,7 @@ fun EditContactScreen(
     val validationFlow by viewModel.validationSharedFlowStream.collectAsStateWithLifecycle(
         initialValue = EditContactValidationState()
     )
+    val screenWidth = LocalConfiguration.current.screenWidthDp
     
     Log.d("EditContactScreen", "Screen state contact value: ${screenState.contact}")
     
@@ -235,17 +249,20 @@ fun EditContactScreen(
 
                 Text(text = stringResource(R.string.select_categories))
                 FlowRow() {
+                    val currentDragState = LocalDragTargetInfo.current
                     screenState.allCategories.forEach { category ->
-                        FilterChip(
-                            selected = screenState.activeCategories.contains(category),
-                            onClick = { viewModel.updateActiveCategories(category) },
-                            label = {
-                                Text(
-                                    text = category.categoryName
-                                )
-                            },
-                            modifier = Modifier.padding(end = 8.dp)
-                        )
+                        DragTarget(dataToDrop = category, viewModel = viewModel) {
+                            FilterChip(
+                                selected = screenState.activeCategories.contains(category),
+                                onClick = { viewModel.updateActiveCategories(category) },
+                                label = {
+                                    Text(
+                                        text = category.categoryName
+                                    )
+                                },
+                                modifier = Modifier.padding(end = 8.dp)
+                            )
+                        }
                     }
                     AssistChip(
                         onClick = {
@@ -261,7 +278,63 @@ fun EditContactScreen(
                         }
                     )
                 }
+                
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally)
+                ) {
+                    AnimatedVisibility(
+                        visible = screenState.draggedCategory != null,
+                        enter = slideInVertically(initialOffsetY = { it })
+                    ) {
+                        DropItem<Category>(
+                            modifier = Modifier
+                                .size(Dp(screenWidth / 3f))
+                        ) { isInBound, categoryItem ->
+                            if (categoryItem != null) {
+                                LaunchedEffect(key1 = categoryItem) {
+                                    viewModel.setChipDragged(categoryItem)
+                                    viewModel.deleteCategory()
+                                }
+                            }
+                            
+                            val deleteColor = if (isInBound)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.onBackground
+                            
+                            Icon(
+                                Icons.Default.Delete,
+                                contentDescription = stringResource(R.string.drag_here_to_delete_category),
+                                tint = deleteColor,
+                                modifier = Modifier.size(48.dp)
+                            )
+                            
+                        }
+                    }
+                }
 
+                if (screenState.isShowingDeleteCategoryModal) {
+                    AlertDialog(
+                        onDismissRequest = { viewModel.abortDeletionOfCategory() },
+                        title = { Text(text = stringResource(id = R.string.delete_category, screenState.draggedCategory?.categoryName
+                            ?: ""))},
+                        dismissButton = {
+                            TextButton(onClick = { viewModel.abortDeletionOfCategory() }) {
+                                Text(text = stringResource(R.string.dismiss))
+                            }
+                        },
+                        confirmButton = { TextButton(onClick = {
+                            viewModel.deleteCategory()
+                        }) {
+                            Text(text = stringResource(id = R.string.delete_cat))
+                        } },
+                        text = {},
+                        
+                    )
+                }
+                
                 if (screenState.isShowingAddCategoryModal) {
                     AlertDialog(
                         onDismissRequest = { viewModel.showAddCategoryModal(false) },
