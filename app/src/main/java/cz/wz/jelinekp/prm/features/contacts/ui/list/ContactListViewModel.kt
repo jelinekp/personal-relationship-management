@@ -30,7 +30,7 @@ class ContactListViewModel(
 
 	fun updateLastContacted(contactId: Long, lastContacted: LocalDateTime = LocalDateTime.now()) {
 		viewModelScope.launch {
-			repository.updateContactLastContacted(contactId = contactId, lastContacted = lastContacted.plusDays(1))
+			repository.updateContactLastContacted(contactId = contactId, lastContacted = lastContacted)
 		}
 	}
 
