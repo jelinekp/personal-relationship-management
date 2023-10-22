@@ -11,10 +11,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -56,8 +60,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cz.wz.jelinekp.prm.R
 import cz.wz.jelinekp.prm.features.categories.draganddrop.DragTarget
+import cz.wz.jelinekp.prm.features.categories.draganddrop.DragableScreen
 import cz.wz.jelinekp.prm.features.categories.draganddrop.DropItem
-import cz.wz.jelinekp.prm.features.categories.draganddrop.LocalDragTargetInfo
 import cz.wz.jelinekp.prm.features.categories.model.Category
 import cz.wz.jelinekp.prm.features.contacts.ui.components.LastContactedDatePicker
 import org.koin.androidx.compose.koinViewModel
@@ -75,14 +79,8 @@ fun EditContactScreen(
         initialValue = EditContactValidationState()
     )
     val screenWidth = LocalConfiguration.current.screenWidthDp
-    
+
     Log.d("EditContactScreen", "Screen state contact value: ${screenState.contact}")
-    
-    val nameFocusRequester = remember { FocusRequester() }
-    val countryFocusRequester = remember { FocusRequester() }
-    val contactMethodFocusRequester = remember { FocusRequester() }
-    val noteFocusRequester = remember { FocusRequester() }
-    val lastContactedFocusRequester = remember { FocusRequester() }
 
     val context = LocalContext.current
 
@@ -139,239 +137,303 @@ fun EditContactScreen(
             )
         },
         content = { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .padding(horizontal = 10.dp)
-                    .fillMaxSize()
-                    .verticalScroll(state = ScrollState(0)),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                
-                Log.d("EditContactScreen", "Screen state contact value in Column Scope: ${screenState.contact}")
-                
-                ContactTextField(
-                    label = stringResource(id = R.string.name),
-                    inputText = screenState.contact.name,
-                    onValueChange = { text -> viewModel.updateName(name = text) },
-                    isError = validationFlow.isNameError,
-                    keyboardActions = KeyboardActions(onNext = { countryFocusRequester.requestFocus() }),
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Next,
-                        capitalization = KeyboardCapitalization.Words
-                    ),
-                    modifier = Modifier.focusRequester(nameFocusRequester)
-                )
-                ContactTextField(
-                    label = stringResource(id = R.string.country),
-                    inputText = screenState.contact.country ?: "",
-                    onValueChange = { text -> viewModel.updateCountry(country = text) },
-                    isError = validationFlow.isCountryError,
-                    keyboardActions = KeyboardActions(onNext = { contactMethodFocusRequester.requestFocus() }),
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Next,
-                        capitalization = KeyboardCapitalization.Words
-                    ),
-                    modifier = Modifier.focusRequester(countryFocusRequester)
-                )
-                ContactTextField(
-                    label = stringResource(R.string.contact_method),
-                    inputText = screenState.contact.contactMethod ?: "",
-                    onValueChange = { text -> viewModel.updateContactMethod(contactMethod = text) },
-                    isError = validationFlow.isContactMethodError,
-                    keyboardActions = KeyboardActions(onNext = { noteFocusRequester.requestFocus() }),
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Next,
-                        capitalization = KeyboardCapitalization.Sentences
-                    ),
-                    modifier = Modifier.focusRequester(contactMethodFocusRequester)
-                )
-                ContactTextField(
-                    label = stringResource(id = R.string.note),
-                    inputText = screenState.contact.note ?: "",
-                    onValueChange = { text -> viewModel.updateNote(note = text) },
-                    singleLine = false,
-                    isError = validationFlow.isNoteError,
-                    keyboardActions = KeyboardActions(onNext = {
-                        lastContactedFocusRequester.requestFocus()
-                        viewModel.showLastContactedDatePicker(isShowing = true)
-                    }),
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Next,
-                        capitalization = KeyboardCapitalization.Sentences
-                    ),
-                    modifier = Modifier.focusRequester(noteFocusRequester)
-                )
+            EditContactScreenContent(
+                paddingValues = paddingValues,
+                screenState = screenState,
+                viewModel = viewModel,
+                validationFlow = validationFlow,
+                screenWidth = screenWidth,
+            )
+        }
+    )
+}
 
-                ReadonlyTextField(
-                    value = screenState.contact.lastContacted.format(DateTimeFormatter.ofPattern(
-                                            stringResource(R.string.date_format_to_display)
-                                        ))
-                        .toString(),
-                    onValueChange = {},
-                    onClick = { viewModel.showLastContactedDatePicker(isShowing = true) },
-                    label = stringResource(R.string.last_contacted_date),
-                    isError = validationFlow.isLastContactedError,
-                    modifier = Modifier.focusRequester(lastContactedFocusRequester),
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@Composable
+fun EditContactScreenContent(
+   paddingValues: PaddingValues,
+   screenState: EditContactScreenState,
+   viewModel: EditContactViewModel,
+   validationFlow: EditContactValidationState,
+   screenWidth: Int,
+) {
+    val nameFocusRequester = remember { FocusRequester() }
+    val countryFocusRequester = remember { FocusRequester() }
+    val contactMethodFocusRequester = remember { FocusRequester() }
+    val noteFocusRequester = remember { FocusRequester() }
+    val lastContactedFocusRequester = remember { FocusRequester() }
+
+    DragableScreen {
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .padding(horizontal = 10.dp)
+                .fillMaxWidth()
+                .verticalScroll(state = ScrollState(0)),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+
+            Log.d(
+                "EditContactScreen",
+                "Screen state contact value in Column Scope: ${screenState.contact}"
+            )
+
+            ContactTextField(
+                label = stringResource(id = R.string.name),
+                inputText = screenState.contact.name,
+                onValueChange = { text -> viewModel.updateName(name = text) },
+                isError = validationFlow.isNameError,
+                keyboardActions = KeyboardActions(onNext = { countryFocusRequester.requestFocus() }),
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next,
+                    capitalization = KeyboardCapitalization.Words
+                ),
+                modifier = Modifier.focusRequester(nameFocusRequester)
+            )
+            ContactTextField(
+                label = stringResource(id = R.string.country),
+                inputText = screenState.contact.country ?: "",
+                onValueChange = { text -> viewModel.updateCountry(country = text) },
+                isError = validationFlow.isCountryError,
+                keyboardActions = KeyboardActions(onNext = { contactMethodFocusRequester.requestFocus() }),
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next,
+                    capitalization = KeyboardCapitalization.Words
+                ),
+                modifier = Modifier.focusRequester(countryFocusRequester)
+            )
+            ContactTextField(
+                label = stringResource(R.string.contact_method),
+                inputText = screenState.contact.contactMethod ?: "",
+                onValueChange = { text -> viewModel.updateContactMethod(contactMethod = text) },
+                isError = validationFlow.isContactMethodError,
+                keyboardActions = KeyboardActions(onNext = { noteFocusRequester.requestFocus() }),
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next,
+                    capitalization = KeyboardCapitalization.Sentences
+                ),
+                modifier = Modifier.focusRequester(contactMethodFocusRequester)
+            )
+            ContactTextField(
+                label = stringResource(id = R.string.note),
+                inputText = screenState.contact.note ?: "",
+                onValueChange = { text -> viewModel.updateNote(note = text) },
+                singleLine = false,
+                isError = validationFlow.isNoteError,
+                keyboardActions = KeyboardActions(onNext = {
+                    lastContactedFocusRequester.requestFocus()
+                    viewModel.showLastContactedDatePicker(isShowing = true)
+                }),
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next,
+                    capitalization = KeyboardCapitalization.Sentences
+                ),
+                modifier = Modifier.focusRequester(noteFocusRequester)
+            )
+
+            ReadonlyTextField(
+                value = screenState.contact.lastContacted.format(
+                    DateTimeFormatter.ofPattern(
+                        stringResource(R.string.date_format_to_display)
+                    )
                 )
+                    .toString(),
+                onValueChange = {},
+                onClick = { viewModel.showLastContactedDatePicker(isShowing = true) },
+                label = stringResource(R.string.last_contacted_date),
+                isError = validationFlow.isLastContactedError,
+                modifier = Modifier.focusRequester(lastContactedFocusRequester),
+            )
 
 
-                if (screenState.isShowingLastContactedDatePicker) {
-                    DatePickerDialog(
-                        onDismissRequest = {
+            if (screenState.isShowingLastContactedDatePicker) {
+                DatePickerDialog(
+                    onDismissRequest = {
+                        viewModel.updateLastContacted(LocalDateTime.now())
+                        viewModel.showLastContactedDatePicker(isShowing = false)
+                    },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            viewModel.showLastContactedDatePicker(
+                                isShowing = false
+                            )
+                        }) {
+                            Text(text = stringResource(id = R.string.ok))
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = {
                             viewModel.updateLastContacted(LocalDateTime.now())
                             viewModel.showLastContactedDatePicker(isShowing = false)
-                        },
-                        confirmButton = {
-                            TextButton(onClick = { viewModel.showLastContactedDatePicker(isShowing = false) }) {
-                                Text(text = stringResource(id = R.string.ok))
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(onClick = {
-                                viewModel.updateLastContacted(LocalDateTime.now())
-                                viewModel.showLastContactedDatePicker(isShowing = false)
-                            }) {
-                                Text(text = stringResource(id = R.string.cancel))
-                            }
-                        }
-                    ) {
-                        LastContactedDatePicker(
-                            initialDateTime = LocalDateTime.now(),
-                            onValueChange = { lastContacted ->
-                                viewModel.updateLastContacted(
-                                    lastContacted = lastContacted
-                                )
-                            }
-                        )
-                    }
-                }
-
-                Text(text = stringResource(R.string.select_categories))
-                FlowRow() {
-                    val currentDragState = LocalDragTargetInfo.current
-                    screenState.allCategories.forEach { category ->
-                        DragTarget(dataToDrop = category, viewModel = viewModel) {
-                            FilterChip(
-                                selected = screenState.activeCategories.contains(category),
-                                onClick = { viewModel.updateActiveCategories(category) },
-                                label = {
-                                    Text(
-                                        text = category.categoryName
-                                    )
-                                },
-                                modifier = Modifier.padding(end = 8.dp)
-                            )
-                        }
-                    }
-                    AssistChip(
-                        onClick = {
-                            viewModel.updateNewCategoryName("")
-                            viewModel.showAddCategoryModal(true)
-                        },
-                        label = { Text(text = stringResource(R.string.add_category)) },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = stringResource(R.string.add)
-                            )
-                        }
-                    )
-                }
-                
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally)
-                ) {
-                    AnimatedVisibility(
-                        visible = screenState.draggedCategory != null,
-                        enter = slideInVertically(initialOffsetY = { it })
-                    ) {
-                        DropItem<Category>(
-                            modifier = Modifier
-                                .size(Dp(screenWidth / 3f))
-                        ) { isInBound, categoryItem ->
-                            if (categoryItem != null) {
-                                LaunchedEffect(key1 = categoryItem) {
-                                    viewModel.setChipDragged(categoryItem)
-                                    viewModel.deleteCategory()
-                                }
-                            }
-                            
-                            val deleteColor = if (isInBound)
-                                MaterialTheme.colorScheme.primary
-                            else
-                                MaterialTheme.colorScheme.onBackground
-                            
-                            Icon(
-                                Icons.Default.Delete,
-                                contentDescription = stringResource(R.string.drag_here_to_delete_category),
-                                tint = deleteColor,
-                                modifier = Modifier.size(48.dp)
-                            )
-                            
-                        }
-                    }
-                }
-
-                if (screenState.isShowingDeleteCategoryModal) {
-                    AlertDialog(
-                        onDismissRequest = { viewModel.abortDeletionOfCategory() },
-                        title = { Text(text = stringResource(id = R.string.delete_category, screenState.draggedCategory?.categoryName
-                            ?: ""))},
-                        dismissButton = {
-                            TextButton(onClick = { viewModel.abortDeletionOfCategory() }) {
-                                Text(text = stringResource(R.string.dismiss))
-                            }
-                        },
-                        confirmButton = { TextButton(onClick = {
-                            viewModel.deleteCategory()
                         }) {
-                            Text(text = stringResource(id = R.string.delete_cat))
-                        } },
-                        text = {},
-                        
-                    )
-                }
-                
-                if (screenState.isShowingAddCategoryModal) {
-                    AlertDialog(
-                        onDismissRequest = { viewModel.showAddCategoryModal(false) },
-                        title = { Text(stringResource(id = R.string.add_category)) },
-                        dismissButton = {
-                            TextButton(onClick = { viewModel.showAddCategoryModal(false) }) {
-                                Text(text = stringResource(R.string.dismiss))
-                            }
-                        },
-                        confirmButton = {
-                            TextButton(onClick = {
-                                viewModel.addCategory()
-                                viewModel.showAddCategoryModal(false)
-                            }) {
-                                Text(text = stringResource(id = R.string.add))
-                            }
-                        },
-                        text = {
-                            ContactTextField(
-                                inputText = screenState.newCategoryName ?: "",
-                                onValueChange = { viewModel.updateNewCategoryName(it) },
-                                label = stringResource(R.string.category_name),
-                                keyboardOptions = KeyboardOptions(
-                                    imeAction = ImeAction.Next,
-                                    capitalization = KeyboardCapitalization.Words
-                                ),
-                                keyboardActions = KeyboardActions(onNext = {
-                                    viewModel.addCategory()
-                                    viewModel.showAddCategoryModal(false)
-                                })
+                            Text(text = stringResource(id = R.string.cancel))
+                        }
+                    }
+                ) {
+                    LastContactedDatePicker(
+                        initialDateTime = LocalDateTime.now(),
+                        onValueChange = { lastContacted ->
+                            viewModel.updateLastContacted(
+                                lastContacted = lastContacted
                             )
-                        },
+                        }
                     )
                 }
             }
+
+            Text(text = stringResource(R.string.select_categories))
+            FlowRow() {
+                screenState.allCategories.forEach { category ->
+                    DragTarget(dataToDrop = category, viewModel = viewModel) {
+                        FilterChip(
+                            selected = screenState.activeCategories.contains(category),
+                            onClick = { viewModel.updateActiveCategories(category) },
+                            label = {
+                                Text(
+                                    text = category.categoryName
+                                )
+                            },
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+                    }
+                }
+                AssistChip(
+                    onClick = {
+                        viewModel.updateNewCategoryName("")
+                        viewModel.showAddCategoryModal(true)
+                    },
+                    label = { Text(text = stringResource(R.string.add_category)) },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = stringResource(R.string.add)
+                        )
+                    }
+                )
+            }
+
+            if (screenState.isShowingDeleteCategoryModal) {
+                AlertDialog(
+                    onDismissRequest = { viewModel.abortDeletionOfCategory() },
+                    title = {
+                        Text(
+                            text = stringResource(
+                                id = R.string.delete_category,
+                                screenState.draggedCategory?.categoryName
+                                    ?: ""
+                            )
+                        )
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { viewModel.abortDeletionOfCategory() }) {
+                            Text(text = stringResource(R.string.dismiss))
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            viewModel.deleteCategory()
+                        }) {
+                            Text(text = stringResource(id = R.string.delete_cat))
+                        }
+                    },
+                    text = {},
+
+                    )
+            }
+
+            if (screenState.isShowingAddCategoryModal) {
+                AlertDialog(
+                    onDismissRequest = { viewModel.showAddCategoryModal(false) },
+                    title = { Text(stringResource(id = R.string.add_category)) },
+                    dismissButton = {
+                        TextButton(onClick = { viewModel.showAddCategoryModal(false) }) {
+                            Text(text = stringResource(R.string.dismiss))
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            viewModel.addCategory()
+                            viewModel.showAddCategoryModal(false)
+                        }) {
+                            Text(text = stringResource(id = R.string.add))
+                        }
+                    },
+                    text = {
+                        ContactTextField(
+                            inputText = screenState.newCategoryName ?: "",
+                            onValueChange = { viewModel.updateNewCategoryName(it) },
+                            label = stringResource(R.string.category_name),
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Next,
+                                capitalization = KeyboardCapitalization.Words
+                            ),
+                            keyboardActions = KeyboardActions(onNext = {
+                                viewModel.addCategory()
+                                viewModel.showAddCategoryModal(false)
+                            })
+                        )
+                    },
+                )
+            }
         }
-    )
+
+        Column(
+            modifier = Modifier
+                .padding(horizontal = screenWidth.dp / 2.5f)
+                .width(screenWidth.dp / 2)
+                .height(110.dp)
+                .absoluteOffset(y = Dp(LocalConfiguration.current.screenHeightDp.toFloat() - 110.dp.value))
+            //.align(Alignment.BottomCenter)
+            ,verticalArrangement = Arrangement.Bottom,
+        ) {
+            AnimatedVisibility(
+                visible = screenState.draggedCategory != null,
+                enter = slideInVertically(initialOffsetY = { it }),
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            ) {
+                DropItem<Category>(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                ) { isInBound, categoryItem ->
+                    if (categoryItem != null) {
+                        LaunchedEffect(key1 = categoryItem) {
+                            viewModel.setChipDragged(categoryItem)
+                        }
+                    }
+
+                    val deleteColor = if (isInBound)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.onBackground
+
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .align(Alignment.BottomCenter)
+                            // .background(MaterialTheme.colorScheme.primaryContainer)
+                    ) {
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = stringResource(R.string.drag_here_to_delete_category),
+                            tint = deleteColor,
+                            modifier = Modifier
+                                .size(80.dp)
+                                .align(Alignment.BottomCenter)
+                                .padding(top = 24.dp)
+                        )
+                    }
+
+                    if (isInBound) {
+                        viewModel.isInBound(true)
+                    } else {
+                        viewModel.isInBound(false)
+                    }
+
+                }
+            }
+        }
+    }
 }
 
 
@@ -416,7 +478,12 @@ fun ReadonlyTextField(
             onValueChange = onValueChange,
             isError = isError,
             modifier = modifier,
-            trailingIcon = { Icon(Icons.Default.ArrowDropDown, contentDescription = stringResource(R.string.dropdown)) },
+            trailingIcon = {
+                Icon(
+                    Icons.Default.ArrowDropDown,
+                    contentDescription = stringResource(R.string.dropdown)
+                )
+            },
         )
         Box(
             modifier = Modifier

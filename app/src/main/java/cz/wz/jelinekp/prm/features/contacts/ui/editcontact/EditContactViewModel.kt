@@ -173,7 +173,7 @@ class EditContactViewModel(
         viewModelScope.launch {
             _validationSharedFlowStream.emit(EditContactValidationState(isLastContactedError = false))
         }
-        updateContactState(_screenStateStream.value.contact.copy(lastContacted = lastContacted.plusDays(1)))
+        updateContactState(_screenStateStream.value.contact.copy(lastContacted = lastContacted))
     }
 
     fun showLastContactedDatePicker(isShowing: Boolean) {
@@ -218,16 +218,17 @@ class EditContactViewModel(
     }
     
     fun dragToDelete() {
-        _screenStateStream.update {
-            it.copy(
-                isShowingAddCategoryModal = true
-            )
-        }
+        if (_screenStateStream.value.isInDeleteBound)
+            _screenStateStream.update {
+                it.copy(
+                    isShowingDeleteCategoryModal = true
+                )
+            }
     }
     
     fun abortDeletionOfCategory() {
         _screenStateStream.update {
-            it.copy(isShowingAddCategoryModal = false)
+            it.copy(isShowingDeleteCategoryModal = false)
         }
         stopChipDragging()
     }
@@ -238,7 +239,7 @@ class EditContactViewModel(
             _screenStateStream.update {
                 it.copy(
                     draggedCategory = null,
-                    isShowingAddCategoryModal = false
+                    isShowingDeleteCategoryModal = false
                 )
             }
         }
@@ -257,7 +258,13 @@ class EditContactViewModel(
             it.copy(draggedCategory = null)
         }
     }
-    
+
+    fun isInBound(bound: Boolean) {
+        _screenStateStream.update {
+            it.copy(isInDeleteBound = bound)
+        }
+    }
+
     companion object {
         const val TAG = "EditContactVM"
     }
@@ -270,6 +277,7 @@ data class EditContactScreenState(
     val isShowingAddCategoryModal: Boolean = false,
     val isShowingDeleteCategoryModal: Boolean = false,
     val isAddingNewContact: Boolean = false,
+    val isInDeleteBound: Boolean = false,
     val activeCategories: List<Category> = emptyList(),
     val allCategories: List<Category> = emptyList(),
     val newCategoryName: String? = null,

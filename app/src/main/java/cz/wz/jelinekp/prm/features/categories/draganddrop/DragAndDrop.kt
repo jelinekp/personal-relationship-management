@@ -1,5 +1,8 @@
 package cz.wz.jelinekp.prm.features.categories.draganddrop
 
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.util.Log
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -17,10 +20,13 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.IntSize
+import androidx.core.content.ContextCompat
 import cz.wz.jelinekp.prm.features.categories.model.Category
 import cz.wz.jelinekp.prm.features.contacts.ui.editcontact.EditContactViewModel
 
+const val TAG = "DragAndDrop"
 internal val LocalDragTargetInfo = compositionLocalOf { DragTargetInfo() }
 
 @Composable
@@ -63,13 +69,14 @@ fun DragableScreen(
 fun <T> DragTarget(
 	modifier: Modifier = Modifier,
 	dataToDrop: T,
-	viewModel: EditContactViewModel,
+	viewModel: EditContactViewModel, // rewrite this to be viewModel independent
 	content: @Composable (() -> Unit)
 ) {
 	
 	var currentPosition by remember { mutableStateOf(Offset.Zero) }
 	val currentState = LocalDragTargetInfo.current
-	
+	val context = LocalView.current.context
+
 	Box(modifier = modifier
 		.onGloballyPositioned {
 			currentPosition = it.localToWindow(
@@ -77,20 +84,33 @@ fun <T> DragTarget(
 			)
 		}
 		.pointerInput(Unit) {
-			detectDragGesturesAfterLongPress(onDragStart = {
-				viewModel.setChipDragged(dataToDrop as Category)
-				currentState.dataToDrop = dataToDrop
-				currentState.isDragging = true
-				currentState.dragPosition = currentPosition + it
-				currentState.draggableComposable = content
-			}, onDrag = { change, dragAmount ->
+			detectDragGesturesAfterLongPress(
+				onDragStart = {
+					ContextCompat.getSystemService(context, Vibrator::class.java)?.vibrate(
+						VibrationEffect.createOneShot(
+							20,
+							VibrationEffect.DEFAULT_AMPLITUDE
+						)
+					)
+					viewModel.setChipDragged(dataToDrop as Category)
+					currentState.dataToDrop = dataToDrop
+					currentState.isDragging = true
+					currentState.dragPosition = currentPosition + it
+					currentState.draggableComposable = content
+				},
+				onDrag = { change, dragAmount ->
 				change.consume()
 				currentState.dragOffset += Offset(dragAmount.x, dragAmount.y)
-			}, onDragEnd = {
-				viewModel.deleteCategory()
+			},
+				onDragEnd = {
+				Log.d(TAG, "Dragging ended")
+				viewModel.dragToDelete()
+				viewModel.stopChipDragging()
 				currentState.isDragging = false
 				currentState.dragOffset = Offset.Zero
-			}, onDragCancel = {
+			},
+				onDragCancel = {
+				Log.d(TAG, "Dragging cancelled")
 				viewModel.stopChipDragging()
 				currentState.dragOffset = Offset.Zero
 				currentState.isDragging = false
