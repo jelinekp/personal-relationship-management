@@ -30,7 +30,13 @@ fun PrmNavHost(
             route = Screen.ContactsScreen.route,
         ) {
             ContactListScreen(
-                onNavigateToAddContact = { navController.navigate(Screen.EditContactScreen(it.toString()).route) }
+                onNavigateToEditContact = {
+                    navController.navigate(
+                        Screen.EditContactScreen(
+                            it?.toString()
+                    ?: "addingNewContact"
+                        ).route)
+                }
             )
         }
         composable(

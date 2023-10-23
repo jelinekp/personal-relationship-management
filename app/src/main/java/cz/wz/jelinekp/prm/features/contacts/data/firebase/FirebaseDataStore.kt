@@ -69,17 +69,9 @@ class FirebaseDataStore(
 		return firebaseCategoryList
 	}
 	
-	private suspend fun contactToFirebaseContact(contact: Contact) : FirebaseContact {
-		val firebaseContact = contact.toFirebaseContact(
-			activeCategories = categoryRepository.getCategoriesOfContact(contact.id) //TODO rewrite to use Contact object categories
-				.first().categories.map { it.toFirebaseCategory() }
-		)
-		Log.d(TAG, "firebaseContactToUpload $firebaseContact")
-		return firebaseContact
-	}
-	
 	suspend fun syncToFirebase(contacts: List<Contact>, categories: List<Category>): Boolean {
 		val user = userRepository.userStream.first() ?: return false
+
 		val contactsReference = firebaseDatabase.getReference("$USERS_NODE/${user.id}/$CONTACTS_NODE")
 		
 		val contactsToUpload = contacts.map { contact ->

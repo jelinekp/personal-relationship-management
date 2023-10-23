@@ -64,7 +64,7 @@ class ContactListViewModel(
 				loadedState.contacts
 			} else {
 				loadedState.contacts.filter { contact ->
-					 contact.categories.map { it.toString() }.contains(categoryName)
+					 contact.categories.map { it.categoryName }.contains(categoryName)
 				}
 			}
 			_screenStateStream.value = loadedState.copy(filteredContacts = filteredContacts, filteredCategory = categoryName)

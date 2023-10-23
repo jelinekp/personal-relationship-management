@@ -44,7 +44,7 @@ import java.time.LocalDateTime
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContactListScreen(
-    onNavigateToAddContact: (contactId: Long?) -> Unit,
+    onNavigateToEditContact: (contactId: Long?) -> Unit,
     //onNavigateToCategory: (categoryId: String) -> Unit,
     modifier: Modifier = Modifier,
     listViewModel: ContactListViewModel = koinViewModel()
@@ -73,12 +73,12 @@ fun ContactListScreen(
             topBar = { PrmTopBar(
                 topBarText = (when (screenState) {
                         is ContactListScreenState.Loaded -> (screenState as ContactListScreenState.Loaded).filteredCategory
-                        is ContactListScreenState.Loading -> stringResource(R.string.app_name)
+                        is ContactListScreenState.Loading -> stringResource(R.string.loading)
                                        }),
                 drawerOpen = { coroutineScope.launch { drawerState.open() }
                      })},
             floatingActionButtonPosition = FabPosition.End,
-            floatingActionButton = { AddContactFab(onClick = { onNavigateToAddContact(null) }) },
+            floatingActionButton = { AddContactFab(onClick = { onNavigateToEditContact(null) }) },
         ) { paddingValues ->
             Column(
                 modifier = modifier
@@ -93,7 +93,7 @@ fun ContactListScreen(
                         onContactedTodayClick = listViewModel::updateLastContacted,
                         onDeleteContact = listViewModel::deleteContact,
                         onLastContactedEditClick = listViewModel::showLastContactedDatePicker,
-                        onEditContactClick = onNavigateToAddContact
+                        onEditContactClick = onNavigateToEditContact
                     )
                 }
             }

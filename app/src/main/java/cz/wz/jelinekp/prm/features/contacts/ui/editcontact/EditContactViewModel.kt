@@ -42,8 +42,8 @@ class EditContactViewModel(
     private suspend fun loadContactData() {
         val contactId: String? = savedStateHandle[Screen.EditContactScreen.ID]
         val contactIdLong: Long
-        
-        if (contactId == null || contactId == "null" || contactId == "") {
+
+        if (contactId == "addingNewContact" || contactId == null || contactId == "") {
             contactIdLong = contactRepository.addContact(Contact.emptyContact)
             _screenStateStream.update {
                 it.copy(
