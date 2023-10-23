@@ -1,7 +1,7 @@
 package cz.wz.jelinekp.prm.features.categories.data
 
-import cz.wz.jelinekp.prm.features.categories.data.db.ContactWithCategories
 import cz.wz.jelinekp.prm.features.categories.model.Category
+import cz.wz.jelinekp.prm.features.contacts.model.Contact
 import kotlinx.coroutines.flow.Flow
 
 interface CategoryLocalDataSource {
@@ -10,7 +10,7 @@ interface CategoryLocalDataSource {
 	
 	suspend fun getAllCategories() : List<Category>
 	
-	fun getCategoriesOfContact(contactId: Long) : Flow<ContactWithCategories>
+	fun getCategoriesOfContact(contactId: Long) : Flow<Contact>
 	
 	suspend fun insertCategory(category: Category)
 	

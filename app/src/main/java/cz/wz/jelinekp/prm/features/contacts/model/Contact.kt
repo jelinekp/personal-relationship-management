@@ -1,6 +1,7 @@
 package cz.wz.jelinekp.prm.features.contacts.model
 
 import cz.wz.jelinekp.prm.features.categories.data.firebase.FirebaseCategory
+import cz.wz.jelinekp.prm.features.categories.model.Category
 import cz.wz.jelinekp.prm.features.contacts.data.db.DbContact
 import cz.wz.jelinekp.prm.features.contacts.data.firebase.FirebaseContact
 import java.time.LocalDateTime
@@ -11,6 +12,7 @@ data class Contact (
 
 	val id: Long = 0,
 	val name: String,
+	val categories: List<Category> = emptyList(),
 	val lastContacted: LocalDateTime = LocalDateTime.now(),
 	val country: String?,
 	val contactMethod: String?,
@@ -39,7 +41,7 @@ data class Contact (
     fun toFirebaseContact() = FirebaseContact(
 		id = id,
 		name = name,
-		categories = emptyList(),
+		categories = categories.map { it.toFirebaseCategory() },
 		lastContacted = lastContacted.toEpochSecond(ZoneOffset.UTC),
 		country = country,
 		contactMethod = contactMethod,

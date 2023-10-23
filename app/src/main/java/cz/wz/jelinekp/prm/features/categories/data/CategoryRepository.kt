@@ -1,7 +1,7 @@
 package cz.wz.jelinekp.prm.features.categories.data
 
-import cz.wz.jelinekp.prm.features.categories.data.db.ContactWithCategories
 import cz.wz.jelinekp.prm.features.categories.model.Category
+import cz.wz.jelinekp.prm.features.contacts.model.Contact
 import kotlinx.coroutines.flow.Flow
 
 class CategoryRepository(
@@ -11,7 +11,7 @@ class CategoryRepository(
 		return categoryLocalDataSource.getAllCategoriesFlow()
 	}
 	
-	fun getCategoriesOfContact(contactId: Long) : Flow<ContactWithCategories> {
+	fun getCategoriesOfContact(contactId: Long) : Flow<Contact> {
 		return categoryLocalDataSource.getCategoriesOfContact(contactId)
 	}
 	

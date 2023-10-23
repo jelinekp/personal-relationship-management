@@ -29,9 +29,8 @@ data class DbContactWithDbCategories(
 	)
 	val categories: List<DbCategory>
 ) {
-	fun toContactWithCategories(): ContactWithCategories {
-		return ContactWithCategories(
-			contact = contact.toContact(),
+	fun toContactWithCategories(): Contact {
+		return contact.toContact().copy(
 			categories = categories.map { it.toCategory() },
 		)
 	}

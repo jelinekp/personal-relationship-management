@@ -71,7 +71,7 @@ class FirebaseDataStore(
 	
 	private suspend fun contactToFirebaseContact(contact: Contact) : FirebaseContact {
 		val firebaseContact = contact.toFirebaseContact(
-			activeCategories = categoryRepository.getCategoriesOfContact(contact.id)
+			activeCategories = categoryRepository.getCategoriesOfContact(contact.id) //TODO rewrite to use Contact object categories
 				.first().categories.map { it.toFirebaseCategory() }
 		)
 		Log.d(TAG, "firebaseContactToUpload $firebaseContact")
@@ -83,7 +83,7 @@ class FirebaseDataStore(
 		val contactsReference = firebaseDatabase.getReference("$USERS_NODE/${user.id}/$CONTACTS_NODE")
 		
 		val contactsToUpload = contacts.map { contact ->
-			contactToFirebaseContact(contact)
+			contact.toFirebaseContact()
 		}
 		
 		contactsReference.setValue(contactsToUpload)

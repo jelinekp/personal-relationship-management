@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.material3.CardDefaults.cardElevation
@@ -29,11 +30,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cz.wz.jelinekp.prm.R
+import cz.wz.jelinekp.prm.features.categories.model.Category
 import cz.wz.jelinekp.prm.features.contacts.model.Contact
 import cz.wz.jelinekp.prm.features.contacts.ui.components.LastContactedDatePicker
 import cz.wz.jelinekp.prm.features.signin.SignInActivity
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDateTime
 
@@ -41,68 +45,137 @@ import java.time.LocalDateTime
 @Composable
 fun ContactListScreen(
     onNavigateToAddContact: (contactId: Long?) -> Unit,
+    //onNavigateToCategory: (categoryId: String) -> Unit,
     modifier: Modifier = Modifier,
     listViewModel: ContactListViewModel = koinViewModel()
 ) {
     val screenState by listViewModel.screenStateStream.collectAsStateWithLifecycle()
     val datePickerState by listViewModel.datePickerScreenStateStream.collectAsStateWithLifecycle()
+    val coroutineScope = rememberCoroutineScope()
 
-    Scaffold(
-        topBar = { PrmTopBar(stringResource(R.string.app_name)) },
-        floatingActionButtonPosition = FabPosition.End,
-        floatingActionButton = { AddContactFab(onClick = { onNavigateToAddContact(null) }) },
-    ) { paddingValues ->
-        Column(
-            modifier = modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-        ) {
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
 
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
             when (screenState) {
                 is ContactListScreenState.Loading -> LoadingState()
-                is ContactListScreenState.Loaded -> LoadedState(
-                    (screenState as ContactListScreenState.Loaded).contacts,
-                    onContactedTodayClick = listViewModel::updateLastContacted,
-                    onDeleteContact = listViewModel::deleteContact,
-                    onLastContactedEditClick = listViewModel::showLastContactedDatePicker,
-                    onEditContactClick = onNavigateToAddContact
+                is ContactListScreenState.Loaded -> DrawerContent(
+                    categories = (screenState as ContactListScreenState.Loaded).categories,
+                    onCategoryClick = listViewModel::filterByCategory.also { coroutineScope.launch {
+                        drawerState.close()
+                    } }
                 )
             }
         }
-
-        var lastContactedVar = LocalDateTime.now()
-
-        if (datePickerState.showLastContactedDatePicker != null) {
-            DatePickerDialog(
-                onDismissRequest = {
-                    listViewModel.hideLastContactedDatePicker()
-                },
-                confirmButton = {
-                    TextButton(onClick = {
-                        listViewModel.hideLastContactedDatePicker()
-                        listViewModel.updateLastContacted(
-                            datePickerState.showLastContactedDatePicker!!,
-                            lastContactedVar
-                        )
-                    }) {
-                        Text(text = stringResource(R.string.ok))
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = {
-                        listViewModel.hideLastContactedDatePicker()
-                    }) {
-                        Text(text = stringResource(R.string.cancel))
-                    }
-                }
+    ) {
+        Scaffold(
+            topBar = { PrmTopBar(
+                topBarText = (when (screenState) {
+                        is ContactListScreenState.Loaded -> (screenState as ContactListScreenState.Loaded).filteredCategory
+                        is ContactListScreenState.Loading -> stringResource(R.string.app_name)
+                                       }),
+                drawerOpen = { coroutineScope.launch { drawerState.open() }
+                     })},
+            floatingActionButtonPosition = FabPosition.End,
+            floatingActionButton = { AddContactFab(onClick = { onNavigateToAddContact(null) }) },
+        ) { paddingValues ->
+            Column(
+                modifier = modifier
+                    .padding(paddingValues)
+                    .fillMaxSize()
             ) {
-                LastContactedDatePicker(
-                    initialDateTime = LocalDateTime.now(),
-                    onValueChange = { lastContacted ->
-                        lastContactedVar = lastContacted
-                    }
-                )
+                when (screenState) {
+                    is ContactListScreenState.Loading -> LoadingState()
+                    is ContactListScreenState.Loaded -> LoadedState(
+                        contacts = (screenState as ContactListScreenState.Loaded).filteredContacts,
+                        activeCategory = (screenState as ContactListScreenState.Loaded).filteredCategory,
+                        onContactedTodayClick = listViewModel::updateLastContacted,
+                        onDeleteContact = listViewModel::deleteContact,
+                        onLastContactedEditClick = listViewModel::showLastContactedDatePicker,
+                        onEditContactClick = onNavigateToAddContact
+                    )
+                }
             }
+
+            var lastContactedVar = LocalDateTime.now()
+
+            if (datePickerState.showLastContactedDatePicker != null) {
+                DatePickerDialog(
+                    onDismissRequest = {
+                        listViewModel.hideLastContactedDatePicker()
+                    },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            listViewModel.hideLastContactedDatePicker()
+                            listViewModel.updateLastContacted(
+                                datePickerState.showLastContactedDatePicker!!,
+                                lastContactedVar
+                            )
+                        }) {
+                            Text(text = stringResource(R.string.ok))
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = {
+                            listViewModel.hideLastContactedDatePicker()
+                        }) {
+                            Text(text = stringResource(R.string.cancel))
+                        }
+                    }
+                ) {
+                    LastContactedDatePicker(
+                        initialDateTime = LocalDateTime.now(),
+                        onValueChange = { lastContacted ->
+                            lastContactedVar = lastContacted
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DrawerContent(
+    categories: List<Category>,
+    onCategoryClick: (categoryId: String) -> Unit,
+) {
+    ModalDrawerSheet {
+        Text(stringResource(R.string.app_name), modifier = Modifier.padding(16.dp))
+        NavigationDrawerItem(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+                .height(44.dp),
+            label = {
+                Text(
+                    text = stringResource(R.string.all_contacts),
+                    style = MaterialTheme.typography.labelLarge,
+                ) },
+            selected = true,
+            onClick = { onCategoryClick("all") }
+        )
+        Divider()
+        Text(
+            modifier = Modifier.padding(all = 22.dp),
+            text = stringResource(R.string.categories),
+            style = MaterialTheme.typography.labelMedium,
+            )
+        categories.forEach { category ->
+            NavigationDrawerItem(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(44.dp)
+                    .padding(horizontal = 8.dp),
+                label = {
+                    Text(
+                        text = category.categoryName,
+                        style = MaterialTheme.typography.labelLarge
+                    ) },
+                selected = false,
+                onClick = { onCategoryClick(category.categoryName) },
+            )
         }
     }
 }
@@ -117,6 +190,7 @@ fun LoadingState() {
 @Composable
 fun LoadedState(
     contacts: List<Contact>,
+    activeCategory: String,
     onContactedTodayClick: (contactId: Long) -> Unit,
     onDeleteContact: (contactId: Long) -> Unit,
     onLastContactedEditClick: (contactId: Long) -> Unit,
@@ -182,7 +256,6 @@ fun ContactItem(
             )
             .fillMaxWidth(),
         elevation = cardElevation(4.dp),
-        //onClick = { expanded = !expanded }, // moved to "combinedClickable()
     ) {
         Row(
             modifier = Modifier
@@ -320,7 +393,8 @@ fun AddContactFab(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrmTopBar(
-    topBarText: String
+    topBarText: String,
+    drawerOpen: () -> Unit,
 ) {
     val contextForToast = LocalContext.current
 
@@ -328,9 +402,15 @@ fun PrmTopBar(
         mutableStateOf(false)
     }
     TopAppBar(
+        navigationIcon = {
+            IconButton(onClick = drawerOpen) {
+                Icon(imageVector = Icons.Default.Menu, contentDescription = stringResource(R.string.menu))
+            }
+        },
         title = {
             Text(
-                text = topBarText,
+                text = if (topBarText == "all") stringResource(R.string.all_contacts) else topBarText,
+                fontSize = 20.sp
             )
         },
         actions = {

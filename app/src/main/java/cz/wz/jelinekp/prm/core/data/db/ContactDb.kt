@@ -14,7 +14,7 @@ import cz.wz.jelinekp.prm.features.contacts.data.db.ContactDao
 import cz.wz.jelinekp.prm.features.contacts.data.db.Converters
 import cz.wz.jelinekp.prm.features.contacts.data.db.DbContact
 
-@Database(entities = [DbContact::class, DbCategory::class, DbContactCategory::class], version = 7)
+@Database(entities = [DbContact::class, DbCategory::class, DbContactCategory::class], version = 9)
 @TypeConverters(Converters::class)
 abstract class ContactDb : RoomDatabase() {
 

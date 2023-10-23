@@ -1,6 +1,5 @@
 package cz.wz.jelinekp.prm.features.contacts.ui.editcontact
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,7 +13,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
@@ -57,12 +55,11 @@ class EditContactViewModel(
         }
         val contactFlow = contactRepository.getContactById(contactIdLong)
         val activeCategoriesFlow =
-            categoryRepository.getCategoriesOfContact(contactIdLong) ?: emptyFlow()
+            categoryRepository.getCategoriesOfContact(contactIdLong)
         
         viewModelScope.launch {
             val allCategoriesFlow = categoryRepository.getAllCategoryFromRoom()
             allCategoriesFlow.collectLatest { allCategoriesList ->
-                Log.d(TAG, "allCategories Fired with content: $allCategoriesList")
                 _screenStateStream.update {
                     it.copy(
                         allCategories = allCategoriesList

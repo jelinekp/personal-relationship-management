@@ -60,4 +60,7 @@
     <string name="delete_category">Are you sure to delete category %s and all its connections?</string>
     <string name="delete_cat">Delete</string>
     <string name="drag_here_to_delete_category">Drag here to delete category</string>
+    <string name="menu">Menu</string>
+    <string name="categories">Categories</string>
+    <string name="all_contacts">All contacts</string>
 </resources>

@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import cz.wz.jelinekp.prm.features.categories.data.db.DbContactWithDbCategories
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
 
@@ -13,13 +14,13 @@ import java.time.LocalDateTime
 interface ContactDao {
 	
 	@Query("SELECT * FROM contact ORDER BY last_contacted ASC")
-	fun getAllContactsFlow() : Flow<List<DbContact>>
+	fun getAllContactsFlow() : Flow<List<DbContactWithDbCategories>>
 	
 	@Query("SELECT * FROM contact ORDER BY last_contacted ASC")
-	suspend fun getAllContacts(): List<DbContact>
+	suspend fun getAllContacts(): List<DbContactWithDbCategories>
 
 	@Query("SELECT * FROM contact WHERE id = :id")
-	fun getContact(id: Long): Flow<DbContact?>
+	fun getContact(id: Long): Flow<DbContactWithDbCategories?>
 
 	@Insert(onConflict = OnConflictStrategy.REPLACE)
 	suspend fun insert(contacts: List<DbContact>) : List<Long>

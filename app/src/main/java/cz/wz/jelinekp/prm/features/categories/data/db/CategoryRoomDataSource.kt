@@ -17,10 +17,8 @@ class CategoryRoomDataSource(
 		return categoryDao.getAllCategories().map { it.toCategory() }
 	}
 	
-	override fun getCategoriesOfContact(contactId: Long): Flow<ContactWithCategories> {
-		return categoryDao.getCategoriesOfContact(contactId).map { it?.toContactWithCategories() ?: ContactWithCategories(
-			Contact.emptyContact, emptyList()
-		) }
+	override fun getCategoriesOfContact(contactId: Long): Flow<Contact> {
+		return categoryDao.getCategoriesOfContact(contactId).map { it?.toContactWithCategories() ?: Contact.emptyContact }
 	}
 	
 	override suspend fun insertCategory(category: Category) {
