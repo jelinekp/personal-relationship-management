@@ -135,14 +135,7 @@ class EditContactViewModel(
     }
 
     private fun updateContactState(contact: Contact) {
-        _screenStateStream.value = _screenStateStream.value.copy(contact = contact)
-    }
-
-    fun updateName(name: String) {
-        viewModelScope.launch {
-            _validationSharedFlowStream.emit(EditContactValidationState(isNameError = false))
-        }
-        updateContactState(_screenStateStream.value.contact.copy(name = name))
+        _screenStateStream.value = _screenStateStream.value.copy(contact = contact, isAnythingChanged = true)
     }
 
     fun updateActiveCategories(category: Category) {
@@ -162,6 +155,13 @@ class EditContactViewModel(
                 categoryRepository.insertContactCategory(category, contactId)
             }
         }
+    }
+
+    fun updateName(name: String) {
+        viewModelScope.launch {
+            _validationSharedFlowStream.emit(EditContactValidationState(isNameError = false))
+        }
+        updateContactState(_screenStateStream.value.contact.copy(name = name))
     }
 
     fun updateCountry(country: String) {
@@ -189,6 +189,10 @@ class EditContactViewModel(
 
     fun showAddCategoryModal(isShowing: Boolean) {
         _screenStateStream.value = _screenStateStream.value.copy(isShowingAddCategoryModal = isShowing)
+    }
+
+    fun showDiscardChangesModal(isShowing: Boolean) {
+        _screenStateStream.value = _screenStateStream.value.copy(isShowingDiscardChangesModal = isShowing)
     }
 
     fun updateNewCategoryName(newCategoryName: String) {
@@ -225,7 +229,7 @@ class EditContactViewModel(
     }
 
     fun dragToDelete() {
-        if (_screenStateStream.value.isInDeleteBound)
+        if (_screenStateStream.value.isCategoryInDeleteBound)
             _screenStateStream.update {
                 it.copy(
                     isShowingDeleteCategoryModal = true
@@ -260,7 +264,7 @@ class EditContactViewModel(
 
     fun isInBound(bound: Boolean) {
         _screenStateStream.update {
-            it.copy(isInDeleteBound = bound)
+            it.copy(isCategoryInDeleteBound = bound)
         }
     }
 
@@ -275,8 +279,10 @@ data class EditContactScreenState(
     val isShowingLastContactedDatePicker: Boolean = false,
     val isShowingAddCategoryModal: Boolean = false,
     val isShowingDeleteCategoryModal: Boolean = false,
+    val isShowingDiscardChangesModal: Boolean = false,
     val isAddingNewContact: Boolean = false,
-    val isInDeleteBound: Boolean = false,
+    val isAnythingChanged: Boolean = false,
+    val isCategoryInDeleteBound: Boolean = false,
     val activeCategories: List<Category> = emptyList(),
     val allCategories: List<Category> = emptyList(),
     val newCategoryName: String? = null,

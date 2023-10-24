@@ -1,7 +1,7 @@
 package cz.wz.jelinekp.prm.features.contacts.ui.editcontact
 
-import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.ScrollState
@@ -80,7 +80,12 @@ fun EditContactScreen(
     )
     val screenWidth = LocalConfiguration.current.screenWidthDp
 
-    Log.d("EditContactScreen", "Screen state contact value: ${screenState.contact}")
+    BackHandler {
+        if (screenState.isAnythingChanged)
+            viewModel.showDiscardChangesModal(true)
+        else
+            navigateUp()
+    }
 
     EditContactValidationToasts(validationFlow = validationFlow)
 
@@ -97,8 +102,10 @@ fun EditContactScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = {
-                        viewModel.revertChanges()
-                        navigateUp()
+                        if (screenState.isAnythingChanged)
+                            viewModel.showDiscardChangesModal(true)
+                        else
+                            navigateUp()
                     }) {
                         Icon(
                             Icons.Default.Clear,
@@ -127,6 +134,7 @@ fun EditContactScreen(
                 viewModel = viewModel,
                 validationFlow = validationFlow,
                 screenWidth = screenWidth,
+                navigateUp = navigateUp,
             )
         }
     )
@@ -139,6 +147,7 @@ fun EditContactScreenContent(
    viewModel: EditContactViewModel,
    validationFlow: EditContactValidationState,
    screenWidth: Int,
+    navigateUp: () -> Unit,
 ) {
     val nameFocusRequester = remember { FocusRequester() }
     val countryFocusRequester = remember { FocusRequester() }
@@ -155,12 +164,6 @@ fun EditContactScreenContent(
                 .verticalScroll(state = ScrollState(0)),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-
-            Log.d(
-                "EditContactScreen",
-                "Screen state contact value in Column Scope: ${screenState.contact}"
-            )
-
             ContactTextField(
                 label = stringResource(id = R.string.name),
                 inputText = screenState.contact.name,
@@ -243,6 +246,7 @@ fun EditContactScreenContent(
         EditContactModals(
             screenState = screenState,
             viewModel = viewModel,
+            navigateUp = navigateUp,
         )
     }
 }
@@ -412,6 +416,7 @@ fun EditContactDragAndDrop(
 fun EditContactModals(
     screenState: EditContactScreenState,
     viewModel: EditContactViewModel,
+    navigateUp: () -> Unit,
 ) {
     if (screenState.isShowingLastContactedDatePicker) {
         DatePickerDialog(
@@ -508,6 +513,36 @@ fun EditContactModals(
                         viewModel.showAddCategoryModal(false)
                     })
                 )
+            },
+        )
+    }
+
+    if (screenState.isShowingDiscardChangesModal) {
+        AlertDialog(
+            onDismissRequest = {
+                viewModel.showDiscardChangesModal(false)
+                               },
+            dismissButton = {
+                TextButton(onClick = {
+                    viewModel.showDiscardChangesModal(false)
+                    viewModel.revertChanges()
+                    navigateUp()
+                }) {
+                    Text(text = stringResource(R.string.discard))
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.showDiscardChangesModal(false)
+                    if (viewModel.applyChanges()) {
+                        navigateUp()
+                    }
+                }) {
+                    Text(text = stringResource(id = R.string.save))
+                }
+            },
+            text = {
+                Text(text = "Your changes have not been saved")
             },
         )
     }
