@@ -101,29 +101,37 @@ class EditContactViewModel(
     }
 
     fun applyChanges() : Boolean {
-        val contactId = _screenStateStream.value.contact.id
-        
+        //val contactId = _screenStateStream.value.contact.id
+
         if (validateInputs()) {
+            viewModelScope.launch { contactRepository.updateContact(_screenStateStream.value.contact) }
             // We're deleting all the contact - category connections
-            val deleteCoroutine = viewModelScope.launch {
+            /*val deleteCoroutine = viewModelScope.launch {
                 _screenStateStream.value.allCategories.forEach {
                     categoryRepository.deleteContactCategory(it, contactId)
                 }
             }
-            
+
             viewModelScope.launch {
                 deleteCoroutine.join() // waiting for the delete to finish before inserting again
-                
+
                 // and than adding only the active connections
-                contactRepository.updateContact(_screenStateStream.value.contact).also {
-                    _screenStateStream.value.activeCategories.forEach {
-                        categoryRepository.insertContactCategory(it, contactId)
-                    }
+                _screenStateStream.value.activeCategories.forEach {
+                    categoryRepository.insertContactCategory(it, contactId)
                 }
-            }
+                contactRepository.updateContact(_screenStateStream.value.contact)
+            }*/
             return true
         }
         return false
+    }
+
+    fun revertChanges() {
+        if (_screenStateStream.value.isAddingNewContact) {
+            viewModelScope.launch {
+                contactRepository.deleteContact(_screenStateStream.value.contact.id)
+            }
+        }
     }
 
     private fun updateContactState(contact: Contact) {
@@ -139,18 +147,20 @@ class EditContactViewModel(
 
     fun updateActiveCategories(category: Category) {
         val contactId = screenStateStream.value.contact.id
-        
+
         viewModelScope.launch {
-            if (_screenStateStream.value.activeCategories.contains(category))
+            if (_screenStateStream.value.activeCategories.contains(category)) {
                 _screenStateStream.update {
                     _screenStateStream.value.copy(activeCategories = _screenStateStream.value.activeCategories - category)
                 }
-            //categoryRepository.deleteContactCategory(category, contactId)
-            else
+                categoryRepository.deleteContactCategory(category, contactId)
+            }
+            else {
                 _screenStateStream.update {
                     _screenStateStream.value.copy(activeCategories = _screenStateStream.value.activeCategories + category)
                 }
-            //categoryRepository.insertContactCategory(category, contactId)
+                categoryRepository.insertContactCategory(category, contactId)
+            }
         }
     }
 
@@ -186,7 +196,7 @@ class EditContactViewModel(
     }
 
     fun addCategory() {
-        
+
         viewModelScope.launch {
             _validationSharedFlowStream.emit(EditContactValidationState(isCategoryError = false))
         }
@@ -200,7 +210,7 @@ class EditContactViewModel(
                     )
                     viewModelScope.launch { categoryRepository.insertCategory(newCategory) }
                 } else {
-                
+
                 }
             } else {
                 viewModelScope.launch {
@@ -209,11 +219,11 @@ class EditContactViewModel(
             }
         }
     }
-    
+
     fun setChipDragged(category: Category) {
         _screenStateStream.update { it.copy(draggedCategory = category) }
     }
-    
+
     fun dragToDelete() {
         if (_screenStateStream.value.isInDeleteBound)
             _screenStateStream.update {
@@ -222,14 +232,14 @@ class EditContactViewModel(
                 )
             }
     }
-    
+
     fun abortDeletionOfCategory() {
         _screenStateStream.update {
             it.copy(isShowingDeleteCategoryModal = false)
         }
         stopChipDragging()
     }
-    
+
     fun deleteCategory() {
         viewModelScope.launch {
             _screenStateStream.value.draggedCategory?.let { categoryRepository.deleteCategory(it) }
@@ -241,15 +251,7 @@ class EditContactViewModel(
             }
         }
     }
-    
-    fun revertChanges() {
-        if (_screenStateStream.value.isAddingNewContact) {
-            viewModelScope.launch {
-                contactRepository.deleteContact(_screenStateStream.value.contact.id)
-            }
-        }
-    }
-    
+
     fun stopChipDragging() {
         _screenStateStream.update {
             it.copy(draggedCategory = null)

@@ -82,23 +82,7 @@ fun EditContactScreen(
 
     Log.d("EditContactScreen", "Screen state contact value: ${screenState.contact}")
 
-    val context = LocalContext.current
-
-    if (validationFlow.isLastContactedError)
-        Toast.makeText(
-            context,
-            stringResource(R.string.last_contacted_date_can_t_be_in_the_future),
-            Toast.LENGTH_SHORT
-        )
-            .show()
-    else if (validationFlow.isNameError)
-        Toast.makeText(
-            context,
-            stringResource(R.string.name_field_can_t_be_empty),
-            Toast.LENGTH_SHORT
-        ).show()
-    else if (validationFlow.isCategoryError)
-        Toast.makeText(context, stringResource(R.string.wrong_category), Toast.LENGTH_SHORT).show()
+    EditContactValidationToasts(validationFlow = validationFlow)
 
     Scaffold(
         topBar = {
@@ -263,7 +247,6 @@ fun EditContactScreenContent(
     }
 }
 
-
 @Composable
 fun ContactTextField(
     onValueChange: (text: String) -> Unit,
@@ -288,6 +271,7 @@ fun ContactTextField(
         trailingIcon = trailingIcon,
     )
 }
+
 
 @Composable
 fun ReadonlyTextField(
@@ -527,4 +511,27 @@ fun EditContactModals(
             },
         )
     }
+}
+
+@Composable
+fun EditContactValidationToasts(
+    validationFlow: EditContactValidationState,
+) {
+    val context = LocalContext.current
+
+    if (validationFlow.isLastContactedError)
+        Toast.makeText(
+            context,
+            stringResource(R.string.last_contacted_date_can_t_be_in_the_future),
+            Toast.LENGTH_SHORT
+        )
+            .show()
+    else if (validationFlow.isNameError)
+        Toast.makeText(
+            context,
+            stringResource(R.string.name_field_can_t_be_empty),
+            Toast.LENGTH_SHORT
+        ).show()
+    else if (validationFlow.isCategoryError)
+        Toast.makeText(context, stringResource(R.string.wrong_category), Toast.LENGTH_SHORT).show()
 }
