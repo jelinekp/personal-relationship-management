@@ -382,7 +382,6 @@ fun AddContactFab(
     onClick: () -> Unit
 ) {
     ExtendedFloatingActionButton(
-        modifier = Modifier.padding(bottom = 12.dp),
         onClick = onClick,
         containerColor = MaterialTheme.colorScheme.primary,
         contentColor = MaterialTheme.colorScheme.onPrimary

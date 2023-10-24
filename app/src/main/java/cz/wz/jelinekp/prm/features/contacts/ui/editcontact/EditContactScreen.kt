@@ -68,7 +68,6 @@ import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditContactScreen(
     navigateUp: () -> Unit,
@@ -90,43 +89,12 @@ fun EditContactScreen(
     EditContactValidationToasts(validationFlow = validationFlow)
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(
-                            if (screenState.isAddingNewContact) R.string.add_contact else
-                                R.string.edit_contact_screen_name
-                        )
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        if (screenState.isAnythingChanged)
-                            viewModel.showDiscardChangesModal(true)
-                        else
-                            navigateUp()
-                    }) {
-                        Icon(
-                            Icons.Default.Clear,
-                            contentDescription = stringResource(R.string.back_icon)
-                        )
-                    }
-                },
-                actions = {
-                    Button(
-                        modifier = Modifier.padding(end = 4.dp),
-                        onClick = {
-                            if (viewModel.applyChanges()) {
-                                navigateUp()
-                            }
-                        },
-                    ) {
-                        Text(stringResource(R.string.save))
-                    }
-                },
-            )
-        },
+        topBar = { EditContactTopBar(
+            screenState = screenState,
+            closeDiscardModal = { viewModel.showDiscardChangesModal(false) },
+            applyChanges = { viewModel.applyChanges() },
+            navigateUp = navigateUp,
+        ) },
         content = { paddingValues ->
             EditContactScreenContent(
                 paddingValues = paddingValues,
@@ -140,6 +108,51 @@ fun EditContactScreen(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditContactTopBar(
+    screenState: EditContactScreenState,
+    closeDiscardModal: () -> Unit,
+    applyChanges: () -> Boolean,
+    navigateUp: () -> Unit,
+) {
+    TopAppBar(
+        title = {
+            Text(
+                text = stringResource(
+                    if (screenState.isAddingNewContact) R.string.add_contact else
+                        R.string.edit_contact_screen_name
+                )
+            )
+        },
+        navigationIcon = {
+            IconButton(onClick = {
+                if (screenState.isAnythingChanged)
+                    closeDiscardModal()
+                else
+                    navigateUp()
+            }) {
+                Icon(
+                    Icons.Default.Clear,
+                    contentDescription = stringResource(R.string.back_icon)
+                )
+            }
+        },
+        actions = {
+            Button(
+                modifier = Modifier.padding(end = 4.dp),
+                onClick = {
+                    if (applyChanges()) {
+                        navigateUp()
+                    }
+                },
+            ) {
+                Text(stringResource(R.string.save))
+            }
+        },
+    )
+}
+
 @Composable
 fun EditContactScreenContent(
    paddingValues: PaddingValues,
@@ -147,7 +160,7 @@ fun EditContactScreenContent(
    viewModel: EditContactViewModel,
    validationFlow: EditContactValidationState,
    screenWidth: Int,
-    navigateUp: () -> Unit,
+   navigateUp: () -> Unit,
 ) {
     val nameFocusRequester = remember { FocusRequester() }
     val countryFocusRequester = remember { FocusRequester() }
