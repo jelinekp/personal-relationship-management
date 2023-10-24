@@ -64,7 +64,8 @@ fun ContactListScreen(
                     categories = (screenState as ContactListScreenState.Loaded).categories,
                     onCategoryClick = listViewModel::filterByCategory.also { coroutineScope.launch {
                         drawerState.close()
-                    } }
+                    } },
+                    selectedCategory = (screenState as ContactListScreenState.Loaded).filteredCategory
                 )
             }
         }
@@ -140,6 +141,7 @@ fun ContactListScreen(
 fun DrawerContent(
     categories: List<Category>,
     onCategoryClick: (categoryId: String) -> Unit,
+    selectedCategory: String,
 ) {
     ModalDrawerSheet {
         Text(stringResource(R.string.app_name), modifier = Modifier.padding(16.dp))
@@ -153,7 +155,7 @@ fun DrawerContent(
                     text = stringResource(R.string.all_contacts),
                     style = MaterialTheme.typography.labelLarge,
                 ) },
-            selected = true,
+            selected = selectedCategory == "all",
             onClick = { onCategoryClick("all") }
         )
         Divider()
@@ -173,7 +175,7 @@ fun DrawerContent(
                         text = category.categoryName,
                         style = MaterialTheme.typography.labelLarge
                     ) },
-                selected = false,
+                selected = selectedCategory == category.categoryName,
                 onClick = { onCategoryClick(category.categoryName) },
             )
         }
